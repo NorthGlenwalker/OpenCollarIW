@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                        OpenCollarUpdater - BundleGiver                         //
-//                                 version 3.928                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//                    github.com/OpenCollar/OpenCollarUpdater                     //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,18 +24,17 @@
 
 integer DO_BUNDLE = 98749;
 integer BUNDLE_DONE = 98750;
-
 integer talkchannel;
 key rcpt;
 string card;
 integer pin;
 string mode;
-
 integer line;
 key lineid;
 integer listener;
 
-SetStatus(string name) {
+SetStatus(string name)
+{
     // use card name, item type, and item name to set a nice 
     // text status message
     list cardparts = llParseString2List(card, ["_"], []);
@@ -48,17 +46,12 @@ SetStatus(string name) {
     llSetText(msg, <1,1,1>, 1.0);
 }
 
-debug(string msg) {
-    //llOwnerSay(llGetScriptName() + ": " + msg);
-}
-
 default
 {   
     link_message(integer sender, integer num, string str, key id)
     {
         if (num == DO_BUNDLE)
         {
-            debug("doing bundle: " + str);
             // str will be in form talkchannel|uuid|bundle_card_name
             list parts = llParseString2List(str, ["|"], []);
             talkchannel = (integer)llList2String(parts, 0);
@@ -69,7 +62,6 @@ default
             line = 0;
             llListenRemove(listener);
             listener = llListen(talkchannel, "", rcpt, "");
-            
             // get the first line of the card
             lineid = llGetNotecardLine(card, line);
         }
@@ -87,17 +79,13 @@ default
                 string name = llList2String(parts, 1);
                 key uuid;
                 string msg;
-                
                 SetStatus(name);
-                
                 uuid = llGetInventoryKey(name);
-                msg = llDumpList2String([type, name, uuid, mode], "|");
-                debug("querying: " + msg);             
+                msg = llDumpList2String([type, name, uuid, mode], "|");           
                 llRegionSayTo(rcpt, talkchannel, msg);
             }
             else
             {
-                debug("finished bundle: " + card);
                 // all done reading the card. send link msg to main script saying we're done.
                 llListenRemove(listener);
                 llSetText("", <1,1,1>, 1.0);
@@ -106,9 +94,8 @@ default
         }
     }
     
-    listen(integer channel, string name, key id, string msg)
+    listen(integer channel, string n, key id, string msg)
     {
-        debug("heard: " + msg);
         // let's live on the edge and assume that we only ever listen with a uuid filter so we know it's safe
         // look for msgs in the form <type>|<name>|<cmd>
         list parts = llParseString2List(msg, ["|"], []);
@@ -124,17 +111,11 @@ default
                 lineid = llGetNotecardLine(card, line);
             }
             else if (cmd == "GIVE")
-            {
-                // give the item, and then read the next notecard line.
+            { // give the item, and then read the next notecard line.
                 if (type == "ITEM")
-                {
                     llGiveInventory(id, name);
-                }
-                else if (type == "SCRIPT")
-                {
-                    // get the full name, and load it via script pin.
+                else if (type == "SCRIPT") // get the full name, and load it via script pin.
                     llRemoteLoadScriptPin(id, name, pin, TRUE, 0);
-                }
                 line++;
                 lineid = llGetNotecardLine(card, line);
             }

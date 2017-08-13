@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                             OpenCollar - settings                              //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,6 +33,8 @@ string PARENT_MENU = "Main";
 string SUBMENU = "Options"; 
 
 string DUMPCACHE = "Dump Cache";
+string WRITECACHE = "Write Cache";
+string CLEARCARD = "Clear Defaults";
 string PREFUSER = "☐ Personal";
 string PREFDESI = "☒ Personal"; // yes, I hate cutoff buttons
 string STEALTH_OFF = "☐ Stealth"; // show the whole CTYPE
@@ -46,11 +47,16 @@ key g_kWearer;
 string g_sScript;
 integer STEALTH;
 
-string defaultscard = "defaultsettings";
+string defaultscard = ".defaultsettings";
 string split_line; // to parse lines that were split due to lsl constraints
 integer defaultsline = 0;
 key defaultslineid;
 key card_key;
+//only needed to convert defaultsettings to .defaultsettings notecard
+string defaultscard_old = "defaultsettings";
+integer defaultsline_old = 0;
+key defaultslineid_old;
+list defaultsettings_notecard;
 
 // Message Map
 integer COMMAND_NOAUTH = 0;
@@ -87,12 +93,16 @@ string ESCAPE_CHAR = "\\"; // end of card line, more value left for token
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -107,23 +117,34 @@ key Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integ
 DoMenu(key keyID, integer iAuth)
 {
     string sPrompt = "\n" + DUMPCACHE + " prints current settings to chat.";
-    sPrompt += "\n" +LOADCARD+" restores the default settings.";
-    list lButtons = [DUMPCACHE,LOADCARD,REFRESH_MENU];
+    sPrompt += "\n" +LOADCARD+" loads the defaultsettings notecard.";
+    list lButtons = [DUMPCACHE,LOADCARD];
+    if (g_kWearer == keyID)//wearer only
+    {
+         sPrompt += "\n" + REFRESH_MENU + " tries to rebuild your collar menus\n" + WRITECACHE + " writes the settings directly to default settings notecard.\n" + CLEARCARD + " clears the settings in the defaultsettings notecard.";
+        lButtons += [REFRESH_MENU,WRITECACHE,CLEARCARD];
+    }
     if (USER_PREF)
     {
         sPrompt += "\n\nUncheck " + PREFDESI + " to give designer settings priority.\n";
-        lButtons += [PREFDESI];
+        lButtons += PREFDESI;
     }
     else
     {
         sPrompt += "\n\nCheck " + PREFUSER + " to give your personal settings priority.\n";
-        lButtons += [PREFUSER];
+        lButtons += PREFUSER;
     }
     
-    if (STEALTH) lButtons += [STEALTH_ON];
-    else lButtons += [STEALTH_OFF];
-    
-    sPrompt +="\nwww.opencollar.at/options";
+    if (STEALTH)
+    {
+        sPrompt += "\n" + STEALTH_ON + " the whole Collar is currently hidden.";
+        lButtons += STEALTH_ON;
+    }
+    else
+    {
+        sPrompt += "\n" + STEALTH_OFF + " the whole Collar is currenty shown.";
+        lButtons += STEALTH_OFF;
+    }
     g_kMenuID = Dialog(keyID, sPrompt, lButtons, [UPMENU], 0, iAuth);
 }
 
@@ -131,7 +152,8 @@ DoMenu(key keyID, integer iAuth)
 string SplitToken(string in, integer slot)
 {
     integer i = llSubStringIndex(in, "_");
-    if (!slot) return llGetSubString(in, 0, i - 1);
+    if (!slot)
+        return llGetSubString(in, 0, i - 1);
     return llGetSubString(in, i + 1, -1);
 }
 // To add new entries at the end of Groupings
@@ -148,16 +170,21 @@ integer GroupIndex(list cache, string token)
 }
 integer SettingExists(string token)
 {
-    if (~llListFindList(USER_SETTINGS, [token])) return TRUE;
-    if (~llListFindList(DESIGN_SETTINGS, [token])) return TRUE;
+    if (~llListFindList(USER_SETTINGS, [token]))
+        return TRUE;
+    if (~llListFindList(DESIGN_SETTINGS, [token]))
+        return TRUE;
     return FALSE;
 }
+
 list SetSetting(list cache, string token, string value)
 {
     integer idx = llListFindList(cache, [token]);
-    if (~idx) return llListReplaceList(cache, [value], idx + 1, idx + 1);
+    if (~idx)
+        return llListReplaceList(cache, [value], idx + 1, idx + 1);
     idx = GroupIndex(cache, token);
-    if (~idx) return llListInsertList(cache, [token, value], idx);
+    if (~idx)
+        return llListInsertList(cache, [token, value], idx);
     return cache + [token, value];
 }
 
@@ -165,18 +192,22 @@ list SetSetting(list cache, string token, string value)
 list AddSetting(list cache, string token, string value)
 {
     integer i = llListFindList(cache, [token]);
-    if (~i) return cache;
+    if (~i)
+        return cache;
     i = GroupIndex(cache, token);
-    if (~i) return llListInsertList(cache, [token, value], i);
+    if (~i)
+        return llListInsertList(cache, [token, value], i);
     return cache + [token, value];
 }
 
 string GetSetting(string token)
 {
     integer i = llListFindList(USER_SETTINGS, [token]);
-    if (USER_PREF && ~i) return llList2String(USER_SETTINGS, i + 1);
+    if (USER_PREF && ~i)
+        return llList2String(USER_SETTINGS, i + 1);
     integer d = llListFindList(DESIGN_SETTINGS, [token]);
-    if (~d) return llList2String(DESIGN_SETTINGS, d + 1);
+    if (~d)
+        return llList2String(DESIGN_SETTINGS, d + 1);
     return llList2String(USER_SETTINGS, i + 1);
 }
 // per = number of entries to put in each bracket
@@ -187,7 +218,8 @@ list ListCombineEntries(list in, string add, integer per)
     {
         list item;
         integer i;
-        for (; i < per; i++) item += llList2List(in, i, i);
+        for (; i < per; i++)
+            item += llList2List(in, i, i);
         out += [llDumpList2String(item, add)];
         in = llDeleteSubList(in, 0, per - 1);
     }
@@ -202,7 +234,8 @@ DumpGroupSettings(string group, key id)
     string val;
     integer i;
     integer x;
-    if (!USER_PREF) jump user;
+    if (!USER_PREF)
+        jump user;
     @designer;
     for (i = 0; i < llGetListLength(DESIGN_SETTINGS); i += 2)
     {
@@ -211,11 +244,14 @@ DumpGroupSettings(string group, key id)
         {
             tok = SplitToken(tok, 1);
             val = llList2String(DESIGN_SETTINGS, i + 1);
-            if (~x == llListFindList(out, [tok])) out = llListReplaceList(out, [val], x + 1, x + 1);
-            else out += [tok, val];
+            if (~x == llListFindList(out, [tok]))
+                out = llListReplaceList(out, [val], x + 1, x + 1);
+            else
+                out += [tok, val];
         }
     }
-    if (!USER_PREF) jump done;
+    if (!USER_PREF)
+        jump done;
     @user;
     for (i = 0; i < llGetListLength(USER_SETTINGS); i += 2)
     {
@@ -224,11 +260,14 @@ DumpGroupSettings(string group, key id)
         {
             tok = SplitToken(tok, 1);
             val = llList2String(USER_SETTINGS, i + 1);
-            if (~x == llListFindList(out, [tok])) out = llListReplaceList(out, [val], x + 1, x + 1);
-            else out += [tok, val];
+            if (~x == llListFindList(out, [tok]))
+                out = llListReplaceList(out, [val], x + 1, x + 1);
+            else
+                out += [tok, val];
         }
     }
-    if (!USER_PREF) jump designer;
+    if (!USER_PREF)
+        jump designer;
     @done;
     out = ListCombineEntries(out, "=", 2);
     tok = (string)id + "\\" + group+ " settings\\";
@@ -240,7 +279,8 @@ DumpGroupSettings(string group, key id)
             llRegionSayTo(id, 0, tok);
             tok = (string)id + "\\" + group + " settings\\" + val;
         }
-        else tok += ";" + val;
+        else
+            tok += ";" + val;
         out = llDeleteSubList(out, 0, 0);
     }
     llRegionSayTo(id, INTERFACE_CHANNEL, tok);
@@ -261,13 +301,15 @@ DelSetting(string token) // we'll only ever delete user settings
         return;
     }
     i = llListFindList(USER_SETTINGS, [token]);
-    if (~i) USER_SETTINGS = llDeleteSubList(USER_SETTINGS, i, i + 1);
+    if (~i)
+        USER_SETTINGS = llDeleteSubList(USER_SETTINGS, i, i + 1);
 }
 
 // run delimiters & add escape-characters for DumpCache
 list Add2OutList(list in)
 {
-    if (!llGetListLength(in)) return [];
+    if (!llGetListLength(in))
+        return [];
     string set = DESIGN_ID;
     list out = ["#---Designer Defaults---#"];
     if (in == USER_SETTINGS)
@@ -296,11 +338,13 @@ list Add2OutList(list in)
         if (group != sid || llStringLength(buffer) == 0 || iAddedLength >= CARD_LIMIT ) // new group
         {
             // Starting a new group.. flush the buffer to the output.
-            if ( llStringLength(buffer) ) out += [buffer] ;
+            if ( llStringLength(buffer) )
+                out += [buffer] ;
             sid = group;
             pre = "\n" + set + sid + "=";
         }
-        else pre = buffer + "~";
+        else
+            pre = buffer + "~";
         temp = pre + tok + "~" + val;
         while (llStringLength(temp))
         {
@@ -311,7 +355,8 @@ list Add2OutList(list in)
                 buffer = llGetSubString(temp, 0, CARD_LIMIT - 2) + ESCAPE_CHAR;
                 temp = "\n" + llDeleteSubString(temp, 0, CARD_LIMIT - 2);
             }
-            else temp = "";
+            else
+                temp = "";
             if ( bIsSplit ) 
             {
                 // if this is either a split buffer or one of it's continuation
@@ -322,7 +367,8 @@ list Add2OutList(list in)
         }
     }
     // If there's anything left in the buffer, flush it to output.
-    if ( llStringLength(buffer) ) out += [buffer] ;
+    if ( llStringLength(buffer) )
+        out += [buffer] ;
     return out;
 }
 
@@ -331,7 +377,7 @@ DumpCache(key id)
     // compile everything into one list, so we can tell the user everything seamlessly
     list out;
     list say = ["Settings (Designer defaults, followed by User Entries)\n"];
-    say += ["The below can be copied and pasted to \"defaultsettings\" notecard\n"];
+    say += ["The below can be copied and pasted to \".defaultsettings\" notecard\n"];
     say += ["Replacing old entries, but must include Designer defaults (if present):\n"];
     say += Add2OutList(DESIGN_SETTINGS) + ["\n"];
     say += Add2OutList(USER_SETTINGS);
@@ -358,42 +404,64 @@ DumpCache(key id)
     }
 }
 
+WriteCache()
+{
+    // compile everything into one list, so we can write corrctly
+    list out;
+    list say = Add2OutList(DESIGN_SETTINGS) + ["\n"];
+    say += Add2OutList(USER_SETTINGS);
+    if (llGetInventoryType( defaultscard ) == 7)
+        llRemoveInventory( defaultscard );
+    iwMakeNotecard( defaultscard, say );
+}
+
+ClearCard()
+{
+    if (llGetInventoryType( defaultscard ) == 7)
+        llRemoveInventory( defaultscard );
+    iwMakeNotecard( defaultscard, [ ] );
+}
+
 SendValues()
 {
     //loop through and send all the settings
     integer n = 0;
     string tok;
     list out;
-    if (USER_PREF) jump DesignSet;
+    if (USER_PREF)
+        jump DesignSet;
     @UserSet;
     for (; n < llGetListLength(USER_SETTINGS); n += 2)
     {
         tok = llList2String(USER_SETTINGS, n) + "=";
         tok += llList2String(USER_SETTINGS, n + 1);
-        if (llListFindList(out, [tok]) == -1) out += [tok];
+        if (llListFindList(out, [tok]) == -1)
+            out += [tok];
     }
     n = 0;
-    if (USER_PREF) jump done;
+    if (USER_PREF)
+        jump done;
     @DesignSet;
     for (; n < llGetListLength(DESIGN_SETTINGS); n += 2)
     {
         tok = llList2String(DESIGN_SETTINGS, n) + "=";
         tok += llList2String(DESIGN_SETTINGS, n + 1);
-        if (llListFindList(out, [tok]) == -1) out += [tok];
+        if (llListFindList(out, [tok]) == -1)
+            out += [tok];
     }
     n = 0;
-    if (USER_PREF) jump UserSet;
+    if (USER_PREF)
+        jump UserSet;
     @done;
     for (; n < llGetListLength(out); n++)
-    {
         llMessageLinked(LINK_SET, LM_SETTING_RESPONSE, llList2String(out, n), "");
-    }
     llMessageLinked(LINK_SET, LM_SETTING_RESPONSE, "settings=sent", "");//tells scripts everything has be sentout
 }
  
 integer UserCommand(integer iAuth, string sStr, key kID)
 {
-    if (iAuth != COMMAND_OWNER && iAuth != COMMAND_WEARER) return FALSE;
+    if (iAuth != COMMAND_OWNER && iAuth != COMMAND_WEARER)
+        return FALSE;
     if (sStr == "menu " + SUBMENU || llToLower(sStr) == llToLower(SUBMENU))
     {
         DoMenu(kID, iAuth);
@@ -402,14 +470,17 @@ integer UserCommand(integer iAuth, string sStr, key kID)
     if (llToLower(llGetSubString(sStr, 0, 4)) == "dump_")
     {
         sStr = llToLower(llGetSubString(sStr, 5, -1));
-        if (sStr == "cache") DumpCache(kID);
-        else DumpGroupSettings(sStr, kID);
+        if (sStr == "cache")
+            DumpCache(kID);
+        else
+            DumpGroupSettings(sStr, kID);
         return TRUE;
     }
         
     integer i = llSubStringIndex(sStr, " ");
     string sid = llToLower(llGetSubString(sStr, 0, i - 1)) + "_";
-    if (sid != llToLower(g_sScript)) return TRUE;
+    if (sid != llToLower(g_sScript))
+        return TRUE;
     string C = llToLower(llGetSubString(sStr, i + 1, -1));
     if (C == llToLower(PREFUSER))
     {
@@ -422,20 +493,19 @@ integer UserCommand(integer iAuth, string sStr, key kID)
         USER_PREF = FALSE;
     }
     else if (C == llToLower(DUMPCACHE))
-    {
         DumpCache(kID);
-    }
+    else if (C == llToLower(WRITECACHE))
+        WriteCache();
+    else if (C == llToLower(CLEARCARD))
+        ClearCard();
     else if (C == llToLower(LOADCARD))
     {
         defaultsline = 0;
-        if (llGetInventoryKey(defaultscard)) {
+        if (llGetInventoryKey(defaultscard))
             defaultslineid = llGetNotecardLine(defaultscard, defaultsline);
-        }
     }
     else if (C == llToLower(REFRESH_MENU))
-    {
         llMessageLinked(LINK_THIS, iAuth,"fixmenus",kID);
-    }
     else if (C == llToLower(STEALTH_OFF)) 
     {
         STEALTH = TRUE;
@@ -446,7 +516,8 @@ integer UserCommand(integer iAuth, string sStr, key kID)
         STEALTH = FALSE;
         llMessageLinked(LINK_THIS, iAuth,"show",kID);
     }
-    else return FALSE;
+    else
+        return FALSE;
     return TRUE;
 }
 
@@ -454,23 +525,34 @@ default
 {
     state_entry()
     {
+        if (llGetInventoryType(defaultscard_old) == 7 && llGetInventoryType( defaultscard ) != 7)//only convert defaultsettings notecard to .defaultsettings notecard if latter does not exist
+        {
+            defaultsline_old = 0;
+            defaultslineid_old = llGetNotecardLine(defaultscard_old, defaultsline_old);
+        }
         g_sScript = llStringTrim(llList2String(llParseString2List(llGetScriptName(), ["-"], []), 1), STRING_TRIM) + "_";
         // Ensure that settings resets AFTER every other script, so that they don't reset after they get settings
-        llSleep(0.5);
+        llSetTimerEvent(0.5);//now using llSetTimerEvent and not llSleep(0.5); to wait for other scripts
         g_kWearer = llGetOwner();
+        
+    }
+    timer()
+    {
+        llSetTimerEvent(0);
         INTERFACE_CHANNEL = (integer)("0x"+llGetSubString((string)g_kWearer,2,7)) + 1111;
-        if (INTERFACE_CHANNEL > 0) INTERFACE_CHANNEL *= -1;
-        if (INTERFACE_CHANNEL > -10000) INTERFACE_CHANNEL -= 30000;
+        if (INTERFACE_CHANNEL > 0)
+            INTERFACE_CHANNEL *= -1;
+        if (INTERFACE_CHANNEL > -10000)
+            INTERFACE_CHANNEL -= 30000;
         defaultsline = 0;
-        if (llGetInventoryKey(defaultscard)) {
+        if (llGetInventoryType(defaultscard) == 7)
+        {
             defaultslineid = llGetNotecardLine(defaultscard, defaultsline);
             card_key = llGetInventoryKey(defaultscard);
         }
         DESIGN_ID = llGetObjectDesc();
         integer i = llSubStringIndex(DESIGN_ID, "~");
-        DESIGN_ID = llGetSubString(DESIGN_ID, i + 1, -1);
-        i = llSubStringIndex(DESIGN_ID, "~");
-        DESIGN_ID = llGetSubString(DESIGN_ID, i + 1, -1);
+        DESIGN_ID = llGetSubString(DESIGN_ID, 0, i-1);
     }
 
     on_rez(integer iParam)
@@ -482,10 +564,13 @@ default
             llSleep(0.5); // brief wait for others to reset
             SendValues();    
         }
-        else llResetScript();
+        else
+            llResetScript();
         // check alpha
-        if (llGetAlpha(ALL_SIDES) > 0) STEALTH = FALSE;
-        else STEALTH = TRUE;
+        if (llGetAlpha(ALL_SIDES) > 0)
+            STEALTH = FALSE;
+        else
+            STEALTH = TRUE;
     }
 
     dataserver(key id, string data)
@@ -505,7 +590,8 @@ default
             {
                 // first we can filter out & skip blank lines & remarks
                 data = llStringTrim(data, STRING_TRIM_HEAD);
-                if (data == "" || llGetSubString(data, 0, 0) == "#") jump nextline;
+                if (data == "" || llGetSubString(data, 0, 0) == "#")
+                    jump nextline;
                 // check for "continued" line pieces
                 if ( llStringLength(split_line) ) 
                 { 
@@ -521,8 +607,9 @@ default
                 // Next we wish to peel the special settings for this collar
                 // unique collar id is followed by Script (that settings are for) + "=tok~val~tok~val"
                 i = llSubStringIndex(data, "_");
-                string id = llGetSubString(data, 0, i);
-                if (id != DESIGN_ID && id != "User_") jump nextline;
+                string id1 = llGetSubString(data, 0, i);
+                if (id1 != DESIGN_ID && id1 != "User_")
+                    jump nextline;
                 data = llGetSubString(data, i + 1, -1); // shave id off
                 i = llSubStringIndex(data, "=");
                 sid = (llGetSubString(data, 0, i - 1)) + "_";
@@ -534,10 +621,13 @@ default
                     val = llList2String(lData, i + 1);
                     if (sid == g_sScript) // a setting for this script
                     {
-                        if (tok == "Pref" && val == "User") USER_PREF = TRUE;
+                        if (tok == "Pref" && val == "User")
+                            USER_PREF = TRUE;
                     }
-                    if (id == DESIGN_ID) DESIGN_SETTINGS = SetSetting(DESIGN_SETTINGS, sid + tok, val);
-                    else USER_SETTINGS = SetSetting(USER_SETTINGS, sid + tok, val);
+                    if (id == DESIGN_ID)
+                        DESIGN_SETTINGS = SetSetting(DESIGN_SETTINGS, sid + tok, val);
+                    else
+                       USER_SETTINGS = SetSetting(USER_SETTINGS, sid + tok, val);
                 }
                 @nextline;
                 defaultsline++;
@@ -551,11 +641,25 @@ default
                 SendValues();
             }
         }
+        else if (id == defaultslineid_old)//only used to copy over settings from old defaultsettings card
+        {
+            if (data != EOF)
+            {
+                defaultsettings_notecard += data;
+                defaultsline_old++;
+                defaultslineid_old = llGetNotecardLine(defaultscard_old, defaultsline_old);
+            }
+            if (data == EOF)
+            {
+                iwMakeNotecard( defaultscard, defaultsettings_notecard );
+            }
+        }
     }
 
     link_message(integer sender, integer iNum, string sStr, key id)
     {
-        if (UserCommand(iNum, sStr, id)) return;
+        if (UserCommand(iNum, sStr, id))
+            return;
         if (iNum == LM_SETTING_SAVE)
         {
             //save the token, value
@@ -564,25 +668,21 @@ default
             string value = llList2String(params, 1);
             // if it's a revert to a designer setting, wipe it from user list
             // otherwise, set it to user list
-            if (~llListFindList(DESIGN_SETTINGS, [token, value])) DelSetting(token);
-            else USER_SETTINGS = SetSetting(USER_SETTINGS, token, value);
+            if (~llListFindList(DESIGN_SETTINGS, [token, value]))
+                DelSetting(token);
+            else
+                USER_SETTINGS = SetSetting(USER_SETTINGS, token, value);
         }
         else if (iNum == LM_SETTING_REQUEST)
         {
             //check the cache for the token
             if (SettingExists(sStr))
-            {
                 llMessageLinked(LINK_SET, LM_SETTING_RESPONSE, sStr + "=" + GetSetting(sStr), "");
-            } 
             else
-            {
                 llMessageLinked(LINK_SET, LM_SETTING_EMPTY, sStr, "");
-            }
         }
         else if (iNum == LM_SETTING_DELETE)
-        {
             DelSetting(sStr);
-        }
         else if (iNum == DIALOG_RESPONSE)
         {
             if (id == g_kMenuID)
@@ -598,13 +698,12 @@ default
                     llMessageLinked(LINK_THIS, iAuth, "menu "+ PARENT_MENU, kAv);
                     return;
                 }
-                if (iAuth < COMMAND_OWNER || iAuth > COMMAND_WEARER) return;
-                
-                if(iAuth==COMMAND_OWNER||iAuth==COMMAND_WEARER)
-                { //moving everything to UserCommand to save doubling up on code.
+                if (iAuth < COMMAND_OWNER || iAuth > COMMAND_WEARER)
+                    return;
+                if(iAuth==COMMAND_OWNER||iAuth==COMMAND_WEARER)//moving everything to UserCommand to save doubling up on code.
                     UserCommand(iAuth,llGetSubString(g_sScript,0,-2)+" "+sMessage,kAv);
-                }
-                else Notify(kAv,"Sorry, only Owners & Wearers may acces this feature.",FALSE);
+                else
+                    Notify(kAv,"Sorry, only Owners & Wearers may acces this feature.",FALSE);
                 DoMenu(kAv, iAuth);
             }
         }
@@ -615,18 +714,22 @@ default
         if (change & CHANGED_COLOR)
         {
             {
-                if (llGetAlpha(ALL_SIDES) > 0) STEALTH = FALSE;
-                else STEALTH = TRUE;
+                if (llGetAlpha(ALL_SIDES) > 0)
+                    STEALTH = FALSE;
+                else
+                    STEALTH = TRUE;
             }
         }
-        if (change & CHANGED_OWNER) llResetScript();
+        if (change & CHANGED_OWNER)
+            llResetScript();
         if (change & CHANGED_INVENTORY)
         {
             if (llGetInventoryKey(defaultscard) != card_key)
             {
                 // the defaultsettings card changed.  Re-read it.
                 defaultsline = 0;
-                if (llGetInventoryKey(defaultscard)) {
+                if (llGetInventoryKey(defaultscard))
+                {
                     defaultslineid = llGetNotecardLine(defaultscard, defaultsline);
                     card_key = llGetInventoryKey(defaultscard);
                 }

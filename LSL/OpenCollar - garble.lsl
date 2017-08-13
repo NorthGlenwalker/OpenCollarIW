@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - garble                               //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,12 +52,16 @@ key g_kBinder;
 
 Notify(key _k, string _m, integer NotifyWearer)
 {
-    if (_k == gkWear) llOwnerSay(_m);
+    if (_k == gkWear)
+        llOwnerSay(_m);
     else
     {
-        if (llGetAgentSize(_k)) llRegionSayTo(_k, 0, _m);
-        else llInstantMessage(_k, _m);
-        if (NotifyWearer) llOwnerSay(_m);
+        if (llGetAgentSize(_k))
+            llRegionSayTo(_k, 0, _m);
+        else
+            llInstantMessage(_k, _m);
+        if (NotifyWearer)
+            llOwnerSay(_m);
     }
 }
 
@@ -71,12 +74,14 @@ string GetScriptID()
 string PeelToken(string in, integer slot)
 {
     integer i = llSubStringIndex(in, "_");
-    if (!slot) return llGetSubString(in, 0, i);
+    if (!slot)
+        return llGetSubString(in, 0, i);
     return llGetSubString(in, i + 1, -1);
 }
 SetPrefix(string in)
 {
-    if (in != "auto") gsPref = in;
+    if (in != "auto")
+        gsPref = in;
     else
     {
         integer i = llSubStringIndex(gsWear, " ") + 1;
@@ -114,7 +119,8 @@ bind(key _k, integer auth)
     llMessageLinked(LINK_SET, RLV_CMD, "redirchat:" + (string)giCRC + "=add,chatshout=n,sendim=n", NULL_KEY);
     if (llGetAgentSize(_k) != ZERO_VECTOR)
     {
-        if (_k != gkWear) llOwnerSay(llKey2Name(_k) + " ordered you to be quiet");
+        if (_k != gkWear)
+            llOwnerSay(llKey2Name(_k) + " ordered you to be quiet");
         Notify(_k, gsWear + "'s speech is now garbled", FALSE);
     }
     llMessageLinked(LINK_THIS, auth, "menu "+g_sParentMenu, _k);
@@ -131,7 +137,8 @@ release(key _k ,integer auth)
     llMessageLinked(LINK_SET, RLV_CMD, "chatshout=y,sendim=y,redirchat:" + (string)giCRC + "=rem", NULL_KEY);
     if (llGetAgentSize(_k) != ZERO_VECTOR)
     {
-        if (_k != gkWear) llOwnerSay("You are free to speak again");
+        if (_k != gkWear)
+            llOwnerSay("You are free to speak again");
         Notify(_k, gsWear + " is allowed to talk again", FALSE);
     }
     llMessageLinked(LINK_THIS, auth, "menu "+g_sParentMenu, _k);
@@ -139,23 +146,31 @@ release(key _k ,integer auth)
 
 integer UserCommand(integer iNum, string sStr, key kID)
 {
-    if (iNum < COMMAND_OWNER || iNum > COMMAND_WEARER) return FALSE;
+    if (iNum < COMMAND_OWNER || iNum > COMMAND_WEARER)
+        return FALSE;
     if (llToLower(sStr) == "settings")
     {
-        if (bOn) Notify(kID, "Garbled.", FALSE);
-        else Notify(kID, "Not Garbled.", FALSE);
+        if (bOn)
+            Notify(kID, "Garbled.", FALSE);
+        else
+            Notify(kID, "Not Garbled.", FALSE);
     }
     else if (sStr == "menu " + GARBLE || llToLower(sStr) == "garble on")
     {
-        if (bOn && g_kBinder == kID) Notify(kID, "I can't garble 'er any more, Jim! She's only a subbie!", FALSE);
-        else if (iNum > g_iBinder) bind(kID, iNum);
+        if (bOn && g_kBinder == kID)
+            Notify(kID, "I can't garble 'er any more, Jim! She's only a subbie!", FALSE);
+        else if (iNum > g_iBinder)
+            bind(kID, iNum);
     }
     else if (sStr == "menu " + UNGARBLE || llToLower(sStr) == "garble off")
     {
-        if (iNum <= g_iBinder) release(kID,iNum);
-        else Notify(kID, "Sorry, " + llKey2Name(kID) + ", the garbler can only be released by someone with an equal or higher rank than the person who set it.", FALSE);
+        if (iNum <= g_iBinder)
+            release(kID,iNum);
+        else
+            Notify(kID, "Sorry, " + llKey2Name(kID) + ", the garbler can only be released by someone with an equal or higher rank than the person who set it.", FALSE);
     }
-    else return FALSE;
+    else
+        return FALSE;
     return TRUE;
 }
 
@@ -163,8 +178,10 @@ default
 {
     on_rez(integer _r)
     {
-        if (llGetOwner() != gkWear) llResetScript();
+        if (llGetOwner() != gkWear)
+            llResetScript();
     }
+    
     state_entry()
     {
         gkWear = llGetOwner();
@@ -174,10 +191,12 @@ default
         gsWear = WEARERNAME;
         
         giCRC = llRound(llFrand(499) + 1);
-        if (bOn) release(gkWear,0);
+        if (bOn)
+            release(gkWear,0);
         llMessageLinked(LINK_THIS, LM_SETTING_REQUEST, "listener_safeword", "");
         llMessageLinked(LINK_THIS, LM_SETTING_REQUEST, GetScriptID() + "Binder", "");
     }
+    
     listen(integer _c, string _n, key _k, string _m)
     {
         if (_c == giCRC)
@@ -212,20 +231,27 @@ default
             return;
         }
     }
+    
     link_message(integer iL, integer iM, string sM, key kM)
     {
-        if (UserCommand(iM, sM, kM)) return;
+        if (UserCommand(iM, sM, kM))
+            return;
         if (iM == MENUNAME_REQUEST && sM == g_sParentMenu)
         {
-            if (bOn) llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + UNGARBLE, "");
-            else llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + GARBLE, "");
+            if (bOn)
+                llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + UNGARBLE, "");
+            else
+                llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + GARBLE, "");
         }
         else if (iM == RLV_REFRESH)
         {
-            if (bOn) llMessageLinked(LINK_SET, RLV_CMD, "redirchat:" + (string)giCRC + "=add,chatshout=n,sendim=n", NULL_KEY);
-            else llMessageLinked(LINK_SET, RLV_CMD, "chatshout=y,sendim=y,redirchat:" + (string)giCRC + "=rem", NULL_KEY);
+            if (bOn)
+                llMessageLinked(LINK_SET, RLV_CMD, "redirchat:" + (string)giCRC + "=add,chatshout=n,sendim=n", NULL_KEY);
+            else
+                llMessageLinked(LINK_SET, RLV_CMD, "chatshout=y,sendim=y,redirchat:" + (string)giCRC + "=rem", NULL_KEY);
         }
-        else if (iM == RLV_CLEAR) release(kM,iL);
+        else if (iM == RLV_CLEAR)
+            release(kM,iL);
         else if ((iM == LM_SETTING_RESPONSE || iM == LM_SETTING_DELETE) && llSubStringIndex(sM, "Global_WearerName") == 0 )
         {
             integer iInd = llSubStringIndex(sM, "=");
@@ -256,14 +282,17 @@ default
                 g_iBinder = (integer)llList2String(lP, 1);
                 bind(g_kBinder, g_iBinder);
             }
-            else if (sT == "listener_safeword") SAFE = sV;
+            else if (sT == "listener_safeword")
+                SAFE = sV;
             else if (sT == "Global_prefix")
             {
-                if (sV == "") sV = "auto";
+                if (sV == "")
+                    sV = "auto";
                 SetPrefix(sV);
             }
         }
-        else if (iM == LM_SETTING_EMPTY && sM == GetScriptID() + "Binder") release(kM,iL);
+        else if (iM == LM_SETTING_EMPTY && sM == GetScriptID() + "Binder")
+            release(kM,iL);
         else if (iM == LM_SETTING_SAVE) // Have to update the safeword if it is changed between resets
         {
             integer iS = llSubStringIndex(sM, "=");
@@ -272,10 +301,12 @@ default
             if (tok == "listener_safeword") SAFE = val;
             else if (tok == "Global_prefix")
             {
-                if (val == "") val = "auto";
+                if (val == "")
+                    val = "auto";
                 SetPrefix(val);
             }
         }
-        if (iM == COMMAND_SAFEWORD) release(kM,iL);
+        if (iM == COMMAND_SAFEWORD)
+            release(kM,iL);
     }
 }

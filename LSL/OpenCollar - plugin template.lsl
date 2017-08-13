@@ -1,8 +1,21 @@
+////////////////////////////////////////////////////////////////////////////////////
+// ------------------------------------------------------------------------------ //
+//                          OpenCollar - plugin template                          //
+//                                 version 3.995                                  //
+// ------------------------------------------------------------------------------ //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
+// ------------------------------------------------------------------------------ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
+// ------------------------------------------------------------------------------ //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
+// ------------------------------------------------------------------------------ //
+////////////////////////////////////////////////////////////////////////////////////
+
 // Template for creating a OpenCollar Plugin
 // API Version: 3.9
 
 // Licensed under the GPLv2, with the additional requirement that these scripts
-// remain "full perms" in Second Life.  See "OpenCollar License" for details.
+// remain "full perms" in InWorldz.  See "OpenCollar License" for details.
 
 // Please agressively remove any unneeded code sections to save memory and sim time
 
@@ -122,10 +135,10 @@ string  UPMENU                     = "^"; // when your menu hears this, give the
 //===============================================================================
 
 
-Debug(string sMsg) {
-    if (!IN_DEBUG_MODE) {
+Debug(string sMsg)
+{
+    if (!IN_DEBUG_MODE)
         return;
-    }
     llOwnerSay(llGetScriptName() + " [DEBUG]: " + sMsg);
 }
 
@@ -140,12 +153,17 @@ Debug(string sMsg) {
 //=
 //===============================================================================
 
-Notify(key kID, string sMsg, integer iAlsoNotifyWearer) {
+Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
+{
     if (kID == g_kWearer) llOwnerSay(sMsg);
-    else {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+    else
+    {
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -179,7 +197,8 @@ key Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integ
 //=
 //===============================================================================
 
-DoMenu(key keyID, integer iAuth) {
+DoMenu(key keyID, integer iAuth)
+{
     string sPrompt = "Pick an option.\n";
     list lMyButtons = PLUGIN_BUTTONS + g_lButtons;
 
@@ -203,7 +222,8 @@ DoMenu(key keyID, integer iAuth) {
 //===============================================================================
 FetchAvi(integer auth, string type, string name, key user)
 {
-    if (name == "") name = " "; // getavi requires a value here - blank will search with no string
+    if (name == "")
+        name = " "; // getavi requires a value here - blank will search with no string
     string out = llDumpList2String(["getavi_", g_sScript, user, auth, type, name], "|");
     // sometimes, you want to exclude possible finds, such as if they exist in a list you are adding to
     // do not search for these names (can be partial string)
@@ -224,28 +244,32 @@ FetchAvi(integer auth, string type, string name, key user)
 //=
 //===============================================================================
 
-integer UserCommand(integer iNum, string sStr, key kID) {
-    if (!(iNum >= COMMAND_OWNER && iNum <= COMMAND_WEARER)) {
+integer UserCommand(integer iNum, string sStr, key kID)
+{
+    if (!(iNum >= COMMAND_OWNER && iNum <= COMMAND_WEARER))
         return FALSE;
-    }
     // a validated command from a owner, secowner, groupmember or the wearer has been received
     // can also be used to listen to chat commands
     list lParams = llParseString2List(sStr, [" "], []);
     string sCommand = llToLower(llList2String(lParams, 0));
     string sValue = llToLower(llList2String(lParams, 1));
         // So commands can accept a value
-    if (sStr == "reset") {
+    if (sStr == "reset")
+    {
         // it is a request for a reset
-        if (iNum == COMMAND_WEARER || iNum == COMMAND_OWNER) {
+        if (iNum == COMMAND_WEARER || iNum == COMMAND_OWNER)
+        {
             //only owner and wearer may reset
             llResetScript();
         }
     }
-    else if (sStr == PLUGIN_CHAT_COMMAND || sStr == "menu " + SUBMENU_BUTTON) {
+    else if (sStr == PLUGIN_CHAT_COMMAND || sStr == "menu " + SUBMENU_BUTTON)
+    {
         // an authorized user requested the plugin menu by typing the menus chat command
         DoMenu(kID, iNum);
     }
-    else if (sStr == "yourcommandhere") {
+    else if (sStr == "yourcommandhere")
+    {
         // example for a command which can be invoked by chat and/or menu, replace yourcommandhere by what you need
         Debug("Do some fancy stuff to impress the user");
 
@@ -260,7 +284,8 @@ integer UserCommand(integer iNum, string sStr, key kID) {
 
 
 
-default {
+default
+{
 
     state_entry()
     {
@@ -279,28 +304,34 @@ default {
     // the settings store isn't available, and also keep settings that were not sent to that store
     // in the first place.
     // Cleo: As per Nan this should be a reset on every rez, this has to be handled as needed, but be prepared that the user can reset your script anytime using the OC menus
-    on_rez(integer iParam) {
-        if (llGetOwner()!=g_kWearer) {
+    on_rez(integer iParam)
+    {
+        if (llGetOwner()!=g_kWearer)
+        {
             // Reset if wearer changed
             llResetScript();
         }
     }
 
     // listen for linked messages from OC scripts
-    link_message(integer iSender, integer iNum, string sStr, key kID) {
-        if (iNum == MENUNAME_REQUEST && sStr == COLLAR_PARENT_MENU) {
+    link_message(integer iSender, integer iNum, string sStr, key kID)
+    {
+        if (iNum == MENUNAME_REQUEST && sStr == COLLAR_PARENT_MENU)
+        {
             // our parent menu requested to receive buttons, so send ours
             llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, COLLAR_PARENT_MENU + "|" + SUBMENU_BUTTON, "");
             g_lButtons = [] ;
             llMessageLinked(LINK_THIS, MENUNAME_REQUEST, SUBMENU_BUTTON, "");
         }
-        else if (iNum == MENUNAME_RESPONSE) {
+        else if (iNum == MENUNAME_RESPONSE)
+        {
             // a button is send to be added to a menu
             list lParts = llParseString2List(sStr, ["|"], []);
             if (llList2String(lParts, 0) == SUBMENU_BUTTON) {
                 // someone wants to stick something in our menu
                 string button = llList2String(lParts, 1);
-                if (llListFindList(g_lButtons, [button]) == -1) {
+                if (llListFindList(g_lButtons, [button]) == -1)
+                {
                     // if the button isnt in our menu yet, than we add it
                     g_lButtons = llListSort(g_lButtons + [button], 1, TRUE);
                 }
@@ -338,22 +369,27 @@ default {
             }
             else if (sToken == "Global_CType") CTYPE = sValue;
         }
-        else if (UserCommand(iNum, sStr, kID)) {
+        else if (UserCommand(iNum, sStr, kID))
+        {
             // do nothing more if TRUE
         }
-        else if (iNum == COMMAND_EVERYONE) {
+        else if (iNum == COMMAND_EVERYONE)
+        {
             // you might want to react on unauthorized users or such, see message map on the top of the script, please remove if not needed
             Debug("Go away and get your own sub, you have no right on this " + CTYPE + "");
         }
-        else if (iNum == COMMAND_SAFEWORD) {
+        else if (iNum == COMMAND_SAFEWORD)
+        {
             // Safeword has been received, release any restricitions that should be released
             Debug("Safeword received, releasing the subs restricions as needed");
         }
-        else if (iNum == DIALOG_RESPONSE) {
+        else if (iNum == DIALOG_RESPONSE)
+        {
             // answer from menu system
             // careful, don't use the variable kID to identify the user, it is the UUID we generated when calling the dialog
             // you have to parse the answer from the dialog system and use the parsed variable kAv
-            if (kID == g_kMenuID) {
+            if (kID == g_kMenuID)
+            {
                 //got a menu response meant for us, extract the values
                 list lMenuParams = llParseStringKeepNulls(sStr, ["|"], []);
                 key kAv = (key)llList2String(lMenuParams, 0); // avatar using the menu
@@ -361,25 +397,30 @@ default {
                 integer iPage = (integer)llList2String(lMenuParams, 2); // menu page
                 integer iAuth = (integer)llList2String(lMenuParams, 3); // auth level of avatar
                 // request to switch to parent menu
-                if (sMessage == UPMENU) {
+                if (sMessage == UPMENU)
+                {
                     //give av the parent menu
                     llMessageLinked(LINK_THIS, iAuth, "menu "+COLLAR_PARENT_MENU, kAv);
                 }
-                else if (~llListFindList(PLUGIN_BUTTONS, [sMessage])) {
+                else if (~llListFindList(PLUGIN_BUTTONS, [sMessage]))
+                {
                     //we got a response for something we handle locally
-                    if (sMessage == "Command 1") {
+                    if (sMessage == "Command 1")
+                    {
                         // do What has to be Done
                         Debug("Command 1");
                         // and restart the menu if wanted/needed
                         DoMenu(kAv, iAuth);
                     }
-                    else if (sMessage == "Command 2") {
+                    else if (sMessage == "Command 2")
+                    {
                         // do What has to be Done
                         Debug("Command 2");
                         // and restart the menu if wanted/needed
                         DoMenu(kAv, iAuth);
                     }
-                    else if (sMessage == "AuthCommand") {
+                    else if (sMessage == "AuthCommand")
+                    {
                         // we assume the action assoctiated to the button also
                         // has a chat command trigger, which we call here,
                         // thus finally handling menu and chat the same way
@@ -388,15 +429,18 @@ default {
                         DoMenu(kAv, iAuth);
                     }
                 }
-                else if (~llListFindList(g_lButtons, [sMessage])) {
+                else if (~llListFindList(g_lButtons, [sMessage]))
+                {
                     //we got a button which another plugin put into into our menu
                     llMessageLinked(LINK_THIS, iAuth, "menu "+ sMessage, kAv);
                 }
             }
         }
-        else if (iNum == DIALOG_TIMEOUT) {
+        else if (iNum == DIALOG_TIMEOUT)
+        {
             // timeout from menu system, you do not have to react on this, but you can
-            if (kID == g_kMenuID) {
+            if (kID == g_kMenuID)
+            {
                 // if you react, make sure the timeout is from your menu by checking the g_kMenuID variable
                 Debug("The user was to slow or lazy, we got a timeout!");
             }

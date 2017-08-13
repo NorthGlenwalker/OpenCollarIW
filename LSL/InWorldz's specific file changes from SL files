@@ -1,0 +1,72 @@
+InWorldz's specific file changes from SL files
+==============================
+
+OpenCollar - anim
+-----------------------
+A couple of "==" that should have been "=" and llResetAnimation changed to  llStopAnimation etc
+
+OpenCollar - auth
+----------------------
+if((key)ID) is not a valid OpenSim command to check if "ID" is a valid UUID key. One Option is to split string at "-" and check stride 5 is not blank for a 99.99% chance it is a UUID.
+
+OpenCollar - couples
+---------------------------
+A  "==" that should have been "="
+Now been removed as conflicted with Leash on "move to" if sub was leashed. couples now separate hud
+
+OpenCollar - garble
+A couple of "==" that should have been "="
+
+OpenCollar - label
+-----------------------
+UUID's of textures changed to IW ones
+string sText; was defined twice in SetLabel()
+
+OpenCollar - leash
+-----------------------
+A couple of "==" that should have been "="
+stay command fixed
+Renamed a number of buttons to be more descriptive
+
+OpenCollar  - leashParticle
+--------------------------------
+changed textures to IW ones
+
+OpenCollar - listener
+-------------------------
+A couple of "==" that should have been "="
+
+OpenCollar - main
+----------------------
+A couple of "==" that should have been "="
+Disabled general access to a number of commands as wearer only commands
+
+OpenCollar - rlvex
+----------------------
+~iInd =  changed to ~iInd == in a few places
+and ~name = changed to ~name ==
+
+OpenCollar - rlvmain
+--------------------------
+A "==" that should have been "="
+
+OpenCollar  - rlvrelay
+---------------------------
+A couple of "==" that should have been "="
+relay buttons disabled when enabled in min mode
+
+OpenCollar - rlvundress
+------------------------------
+A couple of "==" that should have been "="
+undress buttons hidden if item locked
+hud remove buttons disabled, to prevent accidental removal of hud items
+
+OpenCollar - settings
+---------------------------
+~x = changed to ~x == in couple of places
+
+Spellings fixed
+Clean up of scripts to standard format
+Hidden menu items not valid to access level
+
+

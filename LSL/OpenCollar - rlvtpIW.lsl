@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - rlvtpIW                              //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 //added back in to handle TP to from owners hud and LM's dropped into collar
@@ -70,10 +69,11 @@ LandmarkMenu(key kAv, integer iAuth)
 
 integer UserCommand(integer iNum, string sStr, key kID)
 {
-    if (iNum < COMMAND_OWNER || iNum > COMMAND_WEARER) return FALSE;
+    if (iNum < COMMAND_OWNER || iNum > COMMAND_WEARER)
+        return FALSE;
     if (sStr == "runaway" && (kID == g_kWearer || iNum == COMMAND_WEARER))
         llResetScript();
-    if (sStr == "menu " + g_sSubMenu || llToLower(sStr) == "tp")
+    if (sStr == "menu " + g_sSubMenu || llToLower(sStr) == "menutp")
         LandmarkMenu(kID, iNum);
     else if (llSubStringIndex(sStr, "tpto ") == 0)//changed from tp as conflicting with bookmarks
     {
@@ -94,9 +94,7 @@ integer UserCommand(integer iNum, string sStr, key kID)
             }
         }
         if (!found)
-        {
             Notify(kID,"The landmark '"+llList2String(lParams, 1)+"' has not been found in the " + CTYPE + " of "+llKey2Name(g_kWearer)+".",FALSE);
-        }
     }
     else
     {

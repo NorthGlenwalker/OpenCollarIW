@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                               OpenCollar - bell                                //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +28,7 @@ integer g_iBellOn=0; // are we ringing. Off is 0, On = Auth of person which enab
 string g_sBellOn="ON"; // menu text of bell on
 string g_sBellOff="OFF"; // menu text of bell off
 
-integer g_iBellShow=FALSE; // is the bell visible
+integer g_iBellShow=TRUE; // is the bell visible
 string g_sBellShow="SHOW"; //menu text of bell visible
 string g_sBellHide="HIDE"; //menu text of bell hidden
 
@@ -85,12 +84,16 @@ key Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integ
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else    
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -127,8 +130,6 @@ DoMenu(key kID, integer iAuth)
     sPrompt += "The volume of the bell is now: "+(string)((integer)(g_fVolume*10))+"/10.\n";
     sPrompt += "The bell rings every "+llGetSubString((string)g_fSpeed,0,2)+" seconds when moving.\n";
     sPrompt += "Currently used sound: "+(string)(g_iCurrentBellSound+1)+"/"+(string)g_iBellSoundCount+"\n";
-    sPrompt +="\nwww.opencollar.at/bell";
-
     lMyButtons += g_lLocalButtons + g_lButtons;
 
     g_kDialogID=Dialog(kID, sPrompt, lMyButtons, [UPMENU], 0, iAuth);
@@ -141,9 +142,7 @@ SetBellElementAlpha()
     integer n;
     integer iLinkElements = llGetListLength(g_lBellElements);
     for (n = 0; n < iLinkElements; n++)
-    {
         llSetLinkAlpha(llList2Integer(g_lBellElements,n), (float)g_iBellShow, ALL_SIDES);
-    }
 }
 
 BuildBellElementList()
@@ -159,18 +158,9 @@ BuildBellElementList()
         // read description
         lParams=llParseString2List((string)llGetObjectDetails(llGetLinkKey(n), [OBJECT_DESC]), ["~"], []);
         // check inf name is baell name
-        if (llList2String(lParams, 0)=="Bell")
-        {
-            // if so store the number of the prim
+        if (llList2String(lParams, 0)=="Bell")// if so store the number of the prim
             g_lBellElements += [n];
-            // Debug("added " + (string)n + " to elements");
-        }
     }
-    if (llGetListLength(g_lBellElements)==0){
-        llMessageLinked(LINK_SET, MENUNAME_REMOVE, g_sParentMenu + "|" + g_sSubMenu, "");
-//        llRemoveInventory(llGetScriptName()); //stops us removing the bell
-    }
-
 }
 
 PrepareSounds()
@@ -182,11 +172,8 @@ PrepareSounds()
     for (i=0;i<m;i++)
     {
         s=llGetInventoryName(INVENTORY_SOUND,i);
-        if (llSubStringIndex(s,"bell_")==0)
-        {
-            // sound found, add key to list
+        if (llSubStringIndex(s,"bell_")==0) // sound found, add key to list
             g_listBellSounds+=llGetInventoryKey(s);
-        }
     }
     // and set the current sound
     g_iBellSoundCount=llGetListLength(g_listBellSounds);
@@ -206,14 +193,12 @@ SaveBellSettings()
 // returns TRUE if eligible (AUTHED link message number)
 integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value, sStr: user command, kID: avatar id
 {
-    if (iNum > COMMAND_WEARER || iNum < COMMAND_OWNER) return FALSE; // sanity check
+    if (iNum > COMMAND_WEARER || iNum < COMMAND_OWNER)
+        return FALSE; // sanity check
     string test=llToLower(sStr);
     if (sStr == "menu " + g_sSubMenu || sStr == "bell")
-    {// the command prefix + bell without any extentsion is used in chat
-        //give this plugin's menu to kID
         DoMenu(kID, iNum);
-    }
-    // we now chekc for chat commands
+    // we now check for chat commands
     else if (llSubStringIndex(test,"bell")==0)
     {
         // it is a chat commad for the bell so process it
@@ -224,8 +209,10 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
         if (sToken=="volume")
         {
             integer n=(integer)sValue;
-            if (n<1) n=1;
-            if (n>10) n=10;
+            if (n < 1)
+                n = 1;
+            if (n > 10)
+                n = 10;
             g_fVolume=(float)n/10;
             SaveBellSettings();
             Notify(kID,"Bell volume set to "+(string)n, TRUE);
@@ -233,8 +220,10 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
         else if (sToken=="delay")
         {
             g_fSpeed=(float)sValue;
-            if (g_fSpeed<g_fSpeedMin) g_fSpeed=g_fSpeedMin;
-            if (g_fSpeed>g_fSpeedMax) g_fSpeed=g_fSpeedMax;
+            if (g_fSpeed < g_fSpeedMin)
+                g_fSpeed = g_fSpeedMin;
+            if (g_fSpeed > g_fSpeedMax)
+                g_fSpeed = g_fSpeedMax;
             SaveBellSettings();
             Notify(kID,"Bell delay set to "+llGetSubString((string)g_fSpeed,0,2)+" seconds.", TRUE);
         }
@@ -260,15 +249,14 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
                 if (g_iBellOn==0)
                 {
                     g_iBellOn=iNum;
-                    if (!g_iHasControl) llRequestPermissions(g_kWearer,PERMISSION_TAKE_CONTROLS);
+                    if (!g_iHasControl)
+                        llRequestPermissions(g_kWearer,PERMISSION_TAKE_CONTROLS);
                     SaveBellSettings();
                     Notify(kID,"The bell rings now.",TRUE);
                 }
             }
             else
-            {
                 Notify(kID,"Group users or Open Acces users cannot change the ring status of the bell.",TRUE);
-            }
         }
         else if (sToken=="off")
         {
@@ -286,17 +274,13 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
                 Notify(kID,"The bell is now quiet.",TRUE);
             }
             else
-            {
                 Notify(kID,"Group users or Open Access users cannot change the ring status of the bell.",TRUE);
-            }
         }
         else if (sToken=="nextsound")
         {
             g_iCurrentBellSound++;
-            if (g_iCurrentBellSound>=g_iBellSoundCount)
-            {
-                g_iCurrentBellSound=0;
-            }
+            if (g_iCurrentBellSound >= g_iBellSoundCount)
+                g_iCurrentBellSound = 0;
             g_kCurrentBellSound=llList2Key(g_listBellSounds,g_iCurrentBellSound);
             Notify(kID,"Bell sound changed, now using "+(string)(g_iCurrentBellSound+1)+" of "+(string)g_iBellSoundCount+".",TRUE);
         }
@@ -316,7 +300,8 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
 string GetName(key uuid)
 {
     string name = llGetDisplayName(uuid);
-    if (name == "???" || name == "") name = llKey2Name(uuid);
+    if (name == "???" || name == "")
+        name = llKey2Name(uuid);
     return name;
 }
     
@@ -340,7 +325,8 @@ default
     on_rez(integer param)
     {
         g_kWearer=llGetOwner();
-        if (g_iBellOn) llRequestPermissions(g_kWearer,PERMISSION_TAKE_CONTROLS);
+        if (g_iBellOn)
+            llRequestPermissions(g_kWearer,PERMISSION_TAKE_CONTROLS);
     }
     
     link_message(integer iSender, integer iNum, string sStr, key kID)
@@ -359,9 +345,7 @@ default
             {//someone wants to stick something in our menu
                 string button = llList2String(lParts, 1);
                 if (llListFindList(g_lButtons, [button]) == -1)
-                {
                     g_lButtons = llListSort(g_lButtons + [button], 1, TRUE);
-                }
             }
         }
         else if (iNum == MENUNAME_REMOVE)
@@ -369,25 +353,23 @@ default
             list lParts = llParseString2List(sStr, ["|"], []);
             if (llList2String(lParts, 0) == g_sSubMenu)
             {
-            string button = llList2String(lParts, 1);
+                string button = llList2String(lParts, 1);
                 integer iIndex = llListFindList(g_lButtons , [button]);
                 if (iIndex != -1)
-                {
                     g_lButtons = llDeleteSubList(g_lButtons , iIndex, iIndex);
-                }
             }
         }
-        else if ((iNum == LM_SETTING_RESPONSE || iNum == LM_SETTING_DELETE)
-            && llSubStringIndex(sStr, "Global_WearerName") == 0 ) {
-        integer iInd = llSubStringIndex(sStr, "=");
-        string sValue = llGetSubString(sStr, iInd + 1, -1);
-        //We have a broadcasted change to WEARERNAME to work with
-        if (iNum == LM_SETTING_RESPONSE) 
-          WEARERNAME = sValue;
-        else 
+        else if ((iNum == LM_SETTING_RESPONSE || iNum == LM_SETTING_DELETE) && llSubStringIndex(sStr, "Global_WearerName") == 0 )
         {
-            g_kWearer = llGetOwner();
-            WEARERNAME = GetName(g_kWearer);
+            integer iInd = llSubStringIndex(sStr, "=");
+            string sValue = llGetSubString(sStr, iInd + 1, -1);
+            //We have a broadcasted change to WEARERNAME to work with
+            if (iNum == LM_SETTING_RESPONSE) 
+              WEARERNAME = sValue;
+            else 
+            {
+                g_kWearer = llGetOwner();
+                WEARERNAME = GetName(g_kWearer);
             }
         }
         else if (iNum == LM_SETTING_RESPONSE)
@@ -404,9 +386,7 @@ default
                 {
                     g_iBellOn=(integer)sValue;
                     if (g_iBellOn && !g_iHasControl)
-                    {
                         llRequestPermissions(g_kWearer,PERMISSION_TAKE_CONTROLS);
-                    }
                     else if (!g_iBellOn && g_iHasControl)
                     {
                         llReleaseControls();
@@ -423,11 +403,14 @@ default
                     g_iCurrentBellSound=(integer)sValue;
                     g_kCurrentBellSound=llList2Key(g_listBellSounds,g_iCurrentBellSound);
                 }
-                else if (sToken == "vol") g_fVolume=(float)sValue/10;
-                else if (sToken == "speed") g_fSpeed=(float)sValue/10;
+                else if (sToken == "vol")
+                    g_fVolume=(float)sValue/10;
+                else if (sToken == "speed")
+                    g_fSpeed=(float)sValue/10;
             }
         }
-        else if (UserCommand(iNum, sStr, kID)) return;
+        else if (UserCommand(iNum, sStr, kID))
+            return;
         else if (iNum==DIALOG_RESPONSE)
         {
             //str will be a 2-element, pipe-delimited list in form pagenum|response
@@ -450,31 +433,36 @@ default
                     if (sMessage == "Vol +") // pump up the volume and store the value
                     {
                         g_fVolume+=g_fVolumeStep;
-                        if (g_fVolume>1.0) g_fVolume=1.0;                        
+                        if (g_fVolume>1.0)
+                            g_fVolume=1.0;                        
                         SaveBellSettings();
                     }
                     else if (sMessage == "Vol -") // be more quiet, and store the value
                     {
                         g_fVolume-=g_fVolumeStep;
-                        if (g_fVolume<0.1) g_fVolume=0.1;                        
+                        if (g_fVolume<0.1)
+                            g_fVolume=0.1;                        
                         SaveBellSettings();
                     }
                     else if (sMessage == "Delay +") // dont annoy people and ring slower
                     {
                         g_fSpeed+=g_fSpeedStep;
-                        if (g_fSpeed>g_fSpeedMax) g_fSpeed=g_fSpeedMax;
+                        if (g_fSpeed>g_fSpeedMax)
+                            g_fSpeed=g_fSpeedMax;
                         SaveBellSettings();
                     }
                     else if (sMessage == "Delay -") // annoy the hell out of the, ring plenty, ring often
                     {
                         g_fSpeed-=g_fSpeedStep;
-                        if (g_fSpeed<g_fSpeedMin) g_fSpeed=g_fSpeedMin;
+                        if (g_fSpeed<g_fSpeedMin)
+                            g_fSpeed=g_fSpeedMin;
                         SaveBellSettings();
                     }
                     else if (sMessage == "Next Sound") // choose another sound for the bell
                     {
                         g_iCurrentBellSound++;
-                        if (g_iCurrentBellSound>=g_iBellSoundCount) g_iCurrentBellSound=0;                        
+                        if (g_iCurrentBellSound>=g_iBellSoundCount)
+                            g_iCurrentBellSound=0;                        
                         g_kCurrentBellSound=llList2Key(g_listBellSounds,g_iCurrentBellSound);
                         SaveBellSettings();
                     }
@@ -491,8 +479,10 @@ default
                     // someone wants to change if the bell rings or not
                 {
                     string s;
-                    if (g_iBellOn>0) s="bell off";
-                    else s="bell on";                    
+                    if (g_iBellOn>0)
+                        s="bell off";
+                    else
+                        s="bell on";                    
                     UserCommand(iAuth,s,kAV);
                 }
                 else if (sMessage == g_sBellShow || sMessage == g_sBellHide)
@@ -551,12 +541,15 @@ default
     }
     changed(integer change)
     {
-        if(change & CHANGED_LINK) BuildBellElementList();
-        else if (change & CHANGED_INVENTORY) PrepareSounds();
+        if(change & CHANGED_LINK)
+            BuildBellElementList();
+        else if (change & CHANGED_INVENTORY)
+            PrepareSounds();
         if (change & CHANGED_COLOR) // ********************* 
         {
             integer iNewHide=!(integer)llGetAlpha(ALL_SIDES) ; //check alpha
-            if (g_iHide != iNewHide){   //check there's a difference to avoid infinite loop
+            if (g_iHide != iNewHide)
+            {   //check there's a difference to avoid infinite loop
                 g_iHide = iNewHide;
                 SetBellElementAlpha(); // update hide elements 
             }

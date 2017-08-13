@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - color                                //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,20 +108,26 @@ key TouchRequest(key kRCPT,  integer iTouchStart, integer iTouchEnd, integer iAu
 {
     key kID = llGenerateKey();
     integer iFlags = 0;
-    if (iTouchStart) iFlags = iFlags | 0x01;
-    if (iTouchEnd) iFlags = iFlags | 0x02;
+    if (iTouchStart)
+        iFlags = iFlags | 0x01;
+    if (iTouchEnd)
+        iFlags = iFlags | 0x02;
     llMessageLinked(LINK_SET, TOUCH_REQUEST, (string)kRCPT + "|" + (string)iFlags + "|" + (string)iAuth, kID);
     return kID;
 } 
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -154,13 +159,9 @@ string ElementType(integer iLinkNumber)
     //not appear in the color or texture menus
     list lParams = llParseString2List(sDesc, ["~"], []);
     if ((~(integer)llListFindList(lParams, ["nocolor"])) || sDesc == "" || sDesc == " " || sDesc == "(No Description)")
-    {
         return "nocolor";
-    }
     else
-    {
         return llList2String(lParams, 0);
-    }
 }
 
 BuildElementList()
@@ -172,9 +173,7 @@ BuildElementList()
     {
         string sElement = ElementType(n);
         if (!(~llListFindList(g_lElements, [sElement])) && sElement != "nocolor")
-        {
             g_lElements += [sElement];
-        }
     }
 }
 
@@ -185,24 +184,17 @@ SetElementColor(string sElement, vector vColor)
     for (n = 2; n <= iLinkCount; n++)
     {
         string thiselement = ElementType(n);
-        if (thiselement == sElement)
-        {
-            //set link to new color
+        if (thiselement == sElement) //set link to new color
             llSetLinkColor(n, vColor, ALL_SIDES);
-        }
     }
     //create shorter string from the color vectors before saving
     string sStrColor = Vec2String(vColor);
     //change the g_lColorSettings list entry for the current element
     integer iIndex = llListFindList(g_lColorSettings, [sElement]);
     if (iIndex == -1)
-    {
         g_lColorSettings += [sElement, sStrColor];
-    }
     else
-    {
         g_lColorSettings = llListReplaceList(g_lColorSettings, [sStrColor], iIndex + 1, iIndex + 1);
-    }
     //save to settings
     llMessageLinked(LINK_SET, LM_SETTING_SAVE, g_sScript + sElement + "=" + sStrColor, "");
 }
@@ -258,7 +250,8 @@ default
                 integer i = 0;
                 for (; i < llGetListLength(g_lColorSettings); i += 2)
                 {
-                    if (i != 0) out += ",";
+                    if (i != 0)
+                        out += ",";
                     out += llList2String(g_lColorSettings, i) + "=";
                     out += llList2String(g_lColorSettings, i + 1);
                 }
@@ -267,13 +260,9 @@ default
             else if (StartsWith(sStr, "setcolor"))
             {
                 if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-                {
                     Notify(kID,"You are not allowed to change the colors.", FALSE);
-                }
                 else if (g_iAppLock)
-                {
                     Notify(kID,"The appearance of the " + CTYPE + " is locked. You cannot access this menu now!", FALSE);
-                }
                 else
                 {
                     list lParams = llParseString2List(sStr, [" "], []);
@@ -306,18 +295,13 @@ default
                 if (iNum == COMMAND_OWNER)
                 {
                     if(llGetSubString(sStr, -1, -1) == "0")
-                    {
                         g_iAppLock  = FALSE;
-                    }
                     else
-                    {
                         g_iAppLock  = TRUE;
-                    }
                 }
             }
 
         }
-        
         else if (iNum == LM_SETTING_RESPONSE)
         {
             integer i = llSubStringIndex(sStr, "=");
@@ -330,15 +314,12 @@ default
                 SetElementColor(sToken, (vector)sValue);
             }
             else if (sToken == g_sAppLockToken)
-            {
                 g_iAppLock = (integer)sValue;
-            }
-            else if (sToken == "Global_CType") CTYPE = sValue;
+            else if (sToken == "Global_CType")
+                CTYPE = sValue;
         }
         else if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
-        {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
-        }
         else if (iNum == DIALOG_RESPONSE)
         {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
@@ -353,11 +334,8 @@ default
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
                 if (sMessage == UPMENU)
                 {
-                    if (g_sCurrentElement == "")
-                    {
-                        //main menu
+                    if (g_sCurrentElement == "") //main menu
                         llMessageLinked(LINK_SET, iAuth, "menu "+g_sParentMenu, kAv);
-                    }
                     else if (g_sCurrentCategory == "")
                     {
                         g_sCurrentElement = "";
@@ -381,7 +359,6 @@ default
                     g_sCurrentCategory = "";
                     CategoryMenu(kAv, iAuth);
                 }
-
                 else if (g_sCurrentCategory == "")
                 {
                     g_lColors = [];
@@ -393,7 +370,6 @@ default
                     g_lColors = llListSort(g_lColors, 2, TRUE);
                     ColorMenu(kAv,iAuth);
                 }
-                //JS: Just curious, why do we have to convert an integer to an (um) integer?? Or did I miss something about indexes in C++??
                 else if (~(integer)llListFindList(g_lColors, [sMessage]))
                 {
                     //found a color, now set it
@@ -408,9 +384,7 @@ default
         {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
             if (iMenuIndex != -1)
-            {
                 g_lMenuIDs=llDeleteSubList(g_lMenuIDs,iMenuIndex,iMenuIndex);
-            }
         }
         else if (iNum == TOUCH_RESPONSE)
         {

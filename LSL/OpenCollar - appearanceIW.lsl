@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
-//                               OpenCollar - appearance                          //
-//                                 version 3.992                                  //
+//                               OpenCollar - appearanceIW                        //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -98,9 +97,12 @@ Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
     if (kID == g_kWearer) llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -113,7 +115,8 @@ string GetScriptID()
 string PeelToken(string in, integer slot)
 {
     integer i = llSubStringIndex(in, "_");
-    if (!slot) return llGetSubString(in, 0, i);
+    if (!slot)
+        return llGetSubString(in, 0, i);
     return llGetSubString(in, i + 1, -1);
 }
 integer MinMaxUnscaled(vector vSize, float fScale)
@@ -152,11 +155,11 @@ integer MinMaxScaled(vector vSize, float fScale)
     }
     else
     {
-        if (vSize.x > 10.0)
+        if (vSize.x > 20.0)
             return TRUE;
-        if (vSize.y > 10.0)
+        if (vSize.y > 20.0)
             return TRUE;
-        if (vSize.z > 10.0)
+        if (vSize.z > 20.0)
             return TRUE;
     }
     return FALSE;
@@ -209,9 +212,7 @@ ScalePrimLoop(integer iScale, integer iRezSize, key kAV)
             return;
         }
         else
-        {
             llSetScale(fScale * vSize); // not linked prim
-        }
     }
     else
     {
@@ -241,14 +242,10 @@ ScalePrimLoop(integer iScale, integer iRezSize, key kAV)
         {
             vPrimScale = fScale * llList2Vector(g_lPrimStartSizes, (iPrimIndex - 1)*2);
             vPrimPos = fScale * llList2Vector(g_lPrimStartSizes, (iPrimIndex - 1)*2+1);
-            if (iPrimIndex == 1) 
-            {
+            if (iPrimIndex == 1)
                 llSetLinkPrimitiveParamsFast(iPrimIndex, [PRIM_SIZE, vPrimScale]);
-            }
-            else 
-            {
+            else
                 llSetLinkPrimitiveParamsFast(iPrimIndex, [PRIM_SIZE, vPrimScale, PRIM_POSITION, vPrimPos]);
-            }
         }
         g_iScaleFactor = iScale;
         g_iSizedByScript = TRUE;
@@ -289,37 +286,35 @@ RotMenu(key kAv, integer iAuth)
     integer iMenuIndex = llListFindList(g_lMenuIDs, [kAv]);
     list lAddMe = [kAv, kMenuID, ROTMENU];
     if (iMenuIndex == -1)
-    {
         g_lMenuIDs += lAddMe;
-    }
     else
-    {
         g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);
-    }
 }
 
 PosMenu(key kAv, integer iAuth)
 {
     string sPrompt = "\nAdjust the "+CTYPE+"'s position.\n\nNOTE: Arrows refer to the neck joint.\n\nCurrent nudge strength is: ";
     list lMyButtons = ["left ←", "up ↑", "forward ↳", "right →", "down ↓", "backward ↲"];// ria iChange
-    if (g_fNudge!=g_fSmallNudge) lMyButtons+=["▸"];
-    else sPrompt += "▸";
-    if (g_fNudge!=g_fMediumNudge) lMyButtons+=["▸▸"];
-    else sPrompt += "▸▸";
-    if (g_fNudge!=g_fLargeNudge) lMyButtons+=["▸▸▸"];
-    else sPrompt += "▸▸▸";
+    if (g_fNudge!=g_fSmallNudge)
+        lMyButtons+=["▸"];
+    else
+        sPrompt += "▸";
+    if (g_fNudge!=g_fMediumNudge)
+        lMyButtons+=["▸▸"];
+    else
+        sPrompt += "▸▸";
+    if (g_fNudge!=g_fLargeNudge)
+        lMyButtons+=["▸▸▸"];
+    else
+        sPrompt += "▸▸▸";
     
     key kMenuID = Dialog(kAv, sPrompt, lMyButtons, [UPMENU], 0, iAuth);
     integer iMenuIndex = llListFindList(g_lMenuIDs, [kAv]);
     list lAddMe = [kAv, kMenuID, POSMENU];
     if (iMenuIndex == -1)
-    {
         g_lMenuIDs += lAddMe;
-    }
     else
-    {
         g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);    
-    }
 }
 
 SizeMenu(key kAv, integer iAuth)
@@ -329,13 +324,9 @@ SizeMenu(key kAv, integer iAuth)
     integer iMenuIndex = llListFindList(g_lMenuIDs, [kAv]);
     list lAddMe = [kAv, kMenuID, SIZEMENU];
     if (iMenuIndex == -1)
-    {
         g_lMenuIDs += lAddMe;
-    }
     else
-    {
         g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);
-    }
 }
 
 DoMenu(key kAv, integer iAuth)
@@ -349,21 +340,16 @@ DoMenu(key kAv, integer iAuth)
     }
     else
     {
-        sPrompt = "\nChange the looks, adjustment and size of your "+CTYPE+".\n\nwww.opencollar.at/appearance";
-    
+        sPrompt = "\nChange the looks, adjustment and size of your "+CTYPE+".";
         lMyButtons = [UNTICKED + APPLOCK] + g_lButtons + g_lLocalButtons ;
     }
     key kMenuID = Dialog(kAv, sPrompt, lMyButtons, [UPMENU], 0, iAuth);
     integer iMenuIndex = llListFindList(g_lMenuIDs, [kAv]);
     list lAddMe = [kAv, kMenuID, g_sSubMenu];
     if (iMenuIndex == -1)
-    {
         g_lMenuIDs += lAddMe;
-    }
     else
-    {
         g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);    
-    }    
 }
 
 default
@@ -395,9 +381,7 @@ default
             {//someone wants to stick something in our menu
                 string button = llList2String(lParts, 1);
                 if (llListFindList(g_lButtons, [button]) == -1)
-                {
                     g_lButtons = llListSort(g_lButtons + [button], 1, TRUE);
-                }
             }
         }
         else if (iNum == MENUNAME_REMOVE)
@@ -407,7 +391,8 @@ default
             {//someone wants to stick something in our menu
                 string button = llList2String(lParts, 1);
                 integer index = llListFindList(g_lButtons, [button]);                
-                if (index != -1) g_lButtons = llDeleteSubList(g_lButtons, index, index);
+                if (index != -1)
+                    g_lButtons = llDeleteSubList(g_lButtons, index, index);
             }
         }
         else if (iNum >= COMMAND_OWNER && iNum <= COMMAND_WEARER)
@@ -424,35 +409,32 @@ default
                     Notify(kID,"You are not allowed to change the "+CTYPE+"'s appearance.", FALSE);
                     llMessageLinked(LINK_SET, iNum, "menu " + g_sParentMenu, kID);
                 }
-                else DoMenu(kID, iNum);
+                else
+                   DoMenu(kID, iNum);
             }
             else if (sStr == "appearance")
             {
                 if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-                {
                     Notify(kID,"You are not allowed to change the "+CTYPE+"'s appearance.", FALSE);
-                }
-                else DoMenu(kID, iNum);
+                else
+                    DoMenu(kID, iNum);
             }
             else if (sStr == "rotation")
             {
                 if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-                {
                     Notify(kID,"You are not allowed to change the "+CTYPE+"'s rotation.", FALSE);
-                }
                 else if (g_iAppLock)
                 {
                     Notify(kID,"The appearance of the "+CTYPE+" is locked. You cannot access this menu now!", FALSE);
                     DoMenu(kID, iNum);
                 }
-                else RotMenu(kID, iNum);
-             }
+                else
+                   RotMenu(kID, iNum);
+            }
             else if (sStr == "position")
             {
                 if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-                {
                     Notify(kID,"You are not allowed to change the "+CTYPE+"'s position.", FALSE);
-                }
                 else if (g_iAppLock)
                 {
                     Notify(kID,"The appearance of the "+CTYPE+" is locked. You cannot access this menu now!", FALSE);
@@ -463,15 +445,14 @@ default
             else if (sStr == "size")
             {
                 if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-                {
                     Notify(kID,"You are not allowed to change the "+CTYPE+"'s size.", FALSE);
-                }
                 else if (g_iAppLock)
                 {
                     Notify(kID,"The appearance of the "+CTYPE+" is locked. You cannot access this menu now!", FALSE);
                     DoMenu(kID, iNum);
                 }
-                else SizeMenu(kID, iNum);
+                else
+                   SizeMenu(kID, iNum);
             }
             else if (sCommand == "lockappearance")
             {
@@ -481,7 +462,8 @@ default
                     if(g_iAppLock) llMessageLinked(LINK_SET, LM_SETTING_SAVE, g_sAppLockToken + "=1", "");
                     else llMessageLinked(LINK_SET, LM_SETTING_DELETE, g_sAppLockToken, "");
                 }
-                else Notify(kID,"Only owners can use this option.", FALSE);
+                else
+                   Notify(kID,"Only owners can use this option.", FALSE);
             }
         }
         else if (iNum == LM_SETTING_RESPONSE)
@@ -489,11 +471,8 @@ default
             list lParams = llParseString2List(sStr, ["="], []);
             string sToken = llList2String(lParams, 0);
             string sValue = llList2String(lParams, 1);
-
             if (sToken == g_sAppLockToken)
-            {
                 g_iAppLock = (integer)sValue;
-            }
         }
         else if (iNum == DIALOG_RESPONSE)
         {
@@ -512,11 +491,8 @@ default
                 g_lMenuIDs = llDeleteSubList(g_lMenuIDs, iMenuIndex - 1, iMenuIndex - 2 + g_iMenuStride);                  
                 if (sMenuType == g_sSubMenu)
                 {
-                    if (sMessage == UPMENU)
-                    {
-                        //give kID the parent menu
+                    if (sMessage == UPMENU)//give kID the parent menu
                         llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                    }
                     else if(llGetSubString(sMessage, llStringLength(TICKED), -1) == APPLOCK)
                     {
                         integer lock = llGetSubString(sMessage, 0, llStringLength(UNTICKED) - 1) == UNTICKED;
@@ -531,33 +507,27 @@ default
                         //      ... which we do not like anymore.
                         //      The only drawback is to make sure the auth test remains consistant
                         //      in both places: here and in the "lockappearance" handler.
-                        if (iAuth == COMMAND_OWNER) g_iAppLock = lock;
+                        if (iAuth == COMMAND_OWNER)
+                            g_iAppLock = lock;
                         // /Hack
-                        if (lock) llMessageLinked(LINK_SET, iAuth, "lockappearance 1", kAv);
-                        else llMessageLinked(LINK_SET, iAuth, "lockappearance 0", kAv);
+                        if (lock)
+                            llMessageLinked(LINK_SET, iAuth, "lockappearance 1", kAv);
+                        else
+                            llMessageLinked(LINK_SET, iAuth, "lockappearance 0", kAv);
                         DoMenu(kAv, iAuth);
                     }
                     else if (~llListFindList(g_lLocalButtons, [sMessage]))
                     {
                         //we got a response for something we handle locally
                         if (sMessage == POSMENU)
-                        {
                             PosMenu(kAv, iAuth);
-                        }
                         else if (sMessage == ROTMENU)
-                        {
                             RotMenu(kAv, iAuth);
-                        }
                         else if (sMessage == SIZEMENU)
-                        {
                             SizeMenu(kAv, iAuth);
-                        }
                     }
-                    else if (~llListFindList(g_lButtons, [sMessage]))
-                    {
-                        //we got a submenu selection
+                    else if (~llListFindList(g_lButtons, [sMessage])) //we got a submenu selection
                         llMessageLinked(LINK_SET, iAuth, "menu " + sMessage, kAv);
-                    }                                
                 }
                 else if (sMenuType == POSMENU)
                 {
@@ -569,46 +539,26 @@ default
                     else if (llGetAttached())
                     {
                         if (sMessage == "forward ↳")
-                        {
                             AdjustPos(<g_fNudge, 0, 0>);
-                        }
                         else if (sMessage == "left ←")
-                        {
-                            AdjustPos(<0, g_fNudge, 0>);                
-                        }
+                            AdjustPos(<0, g_fNudge, 0>);
                         else if (sMessage == "up ↑")
-                        {
-                            AdjustPos(<0, 0, g_fNudge>);                
-                        }            
+                            AdjustPos(<0, 0, g_fNudge>);
                         else if (sMessage == "backward ↲")
-                        {
-                            AdjustPos(<-g_fNudge, 0, 0>);                
-                        }            
+                            AdjustPos(<-g_fNudge, 0, 0>);
                         else if (sMessage == "right →")
-                        {
-                            AdjustPos(<0, -g_fNudge, 0>);                    
-                        }            
+                            AdjustPos(<0, -g_fNudge, 0>);
                         else if (sMessage == "down ↓")
-                        {
-                            AdjustPos(<0, 0, -g_fNudge>);                
-                        }                            
+                            AdjustPos(<0, 0, -g_fNudge>);
                         else if (sMessage == "▸")
-                        {
                             g_fNudge=g_fSmallNudge;
-                        }
                         else if (sMessage == "▸▸")
-                        {
-                            g_fNudge=g_fMediumNudge;                
-                        }
+                            g_fNudge=g_fMediumNudge;
                         else if (sMessage == "▸▸▸")
-                        {
-                            g_fNudge=g_fLargeNudge;                
-                        }
+                            g_fNudge=g_fLargeNudge;
                     }
                     else
-                    {
                         Notify(kAv, "Sorry, position can only be adjusted while worn",FALSE);
-                    }
                     PosMenu(kAv, iAuth);                    
                 }
                 else if (sMenuType == ROTMENU)
@@ -621,34 +571,20 @@ default
                     else if (llGetAttached())
                     {
                         if (sMessage == "tilt right ↘") // was tilt up
-                        {
                             AdjustRot(<g_fRotNudge, 0, 0>);
-                        }
                         else if (sMessage == "tilt up ↻") // was right
-                        {
-                            AdjustRot(<0, g_fRotNudge, 0>);             
-                        }
+                            AdjustRot(<0, g_fRotNudge, 0>);
                         else if (sMessage == "right ↷") // was tilt left
-                        {
-                            AdjustRot(<0, 0, g_fRotNudge>);           
-                        }            
+                            AdjustRot(<0, 0, g_fRotNudge>);
                         else if (sMessage == "tilt left ↙") // was tilt down
-                        {
-                            AdjustRot(<-g_fRotNudge, 0, 0>);              
-                        }            
+                            AdjustRot(<-g_fRotNudge, 0, 0>);
                         else if (sMessage == "tilt down ↺") // was left
-                        {
-                            AdjustRot(<0, -g_fRotNudge, 0>);              
-                        }            
+                            AdjustRot(<0, -g_fRotNudge, 0>);
                         else if (sMessage == "left ↶") // was tilt right
-                        {
-                            AdjustRot(<0, 0, -g_fRotNudge>);            
-                        }                        
+                            AdjustRot(<0, 0, -g_fRotNudge>);
                     }
                     else
-                    {
                         Notify(kAv, "Sorry, position can only be adjusted while worn", FALSE);
-                    }
                     RotMenu(kAv, iAuth);                     
                 }
                 else if (sMenuType == SIZEMENU)
@@ -668,18 +604,12 @@ default
                             {
                                 // ResSize requested
                                 if (g_iScaleFactor == 100)
-                                {
                                     Notify(kAv, "Resizing canceled; the "+CTYPE+" is already at original size.", FALSE); 
-                                }
                                 else
-                                {
                                     ScalePrimLoop(100, TRUE, kAv);
-                                }
                             }
                             else
-                            {
                                 ScalePrimLoop(g_iScaleFactor + iSizeFactor, FALSE, kAv);
-                            }
                         }
                         SizeMenu(kAv, iAuth);
                     }
@@ -702,22 +632,13 @@ default
     {
         if (iChange & (CHANGED_SCALE))
         {
-            if (g_iSizedByScript)
-            // the item had ben rescaled by the script, do NOT reset the script and store new positions
-            {
-                // ignore the event and trigger timer to reset flag. needed as we got the event twice after scaling
+            if (g_iSizedByScript)// the item had ben rescaled by the script, do NOT reset the script and store new positions ignore the event and trigger timer to reset flag. needed as we got the event twice after scaling
                 llSetTimerEvent(0.5);
-            }
-            else
-            // it was a user change, so we have to store the basic values again
-            {
+            else// it was a user change, so we have to store the basic values again
                     Store_StartScaleLoop();
-            }
         }
         if (iChange & (CHANGED_SHAPE | CHANGED_LINK))
-        {
             Store_StartScaleLoop();
-        }
     }
     
     timer()

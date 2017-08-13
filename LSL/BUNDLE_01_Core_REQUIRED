@@ -2,17 +2,19 @@ ITEM|OpenCollar Guide
 ITEM|OpenCollar License
 ITEM|Leash Holder
 ITEM|Grabby Post
-ITEM|coupleanims
-ITEM|.bookmarks
+ITEM|InWorldz's specific file changes from SL files
+ITEM|OpenCollar Designers Guide
+ITEM|OpenCollar Updates 3.995
+ITEM|~heightscalars
 SCRIPT|OpenCollar - cleanup
 SCRIPT|OpenCollar - mainIW
 SCRIPT|OpenCollar - authIW
 SCRIPT|OpenCollar - listener
 SCRIPT|OpenCollar - dialog
-SCRIPT|OpenCollar - settings
+SCRIPT|OpenCollar - settingsIW
 SCRIPT|OpenCollar - leashIW
 SCRIPT|OpenCollar - leashParticleIW
-SCRIPT|OpenCollar - appearance
+SCRIPT|OpenCollar - appearanceIW
 SCRIPT|OpenCollar - hide
 SCRIPT|OpenCollar - label
 SCRIPT|OpenCollar - bell

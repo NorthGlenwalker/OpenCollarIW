@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - cleanup                              //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,24 +28,25 @@ integer UPDATE = 10001;
 
 // Function that will look at all items in the prim and delete any
 // whose names contain the pattern.
-DelMatchingItems(string pattern) {
+DelMatchingItems(string pattern)
+{
     integer n;
     // Loop from the top down so we don't screw up inventory numbers as we delete
-    for (n = llGetInventoryNumber(INVENTORY_ALL); n >= 0; n--) {
+    for (n = llGetInventoryNumber(INVENTORY_ALL); n >= 0; n--)
+    {
         string name = llGetInventoryName(INVENTORY_ALL, n);
         // look for match but don't delete self.
-        if (llSubStringIndex(name, pattern) != -1
-            && name != llGetScriptName()) {
-            // found the item we're looking for.  Remove!
+        if (llSubStringIndex(name, pattern) != -1 && name != llGetScriptName()) // found the item we're looking for.  Remove!
             llRemoveInventory(name);
-        }
     }           
 }
 
-DelItems(list items) {
+DelItems(list items)
+{
     integer n;
     integer stop = llGetListLength(items);
-    for (n = 0; n < stop; n++) {
+    for (n = 0; n < stop; n++)
+    {
         string pattern = llList2String(items, n);
         DelMatchingItems(pattern);
     }
@@ -54,30 +54,30 @@ DelItems(list items) {
 
 default
 {
-    state_entry() { 
+    state_entry()
+    { 
         // Don't run cleanup if placed in an updater
-        if (llSubStringIndex(llGetObjectName(), "Updater") != -1) {
+        if (llSubStringIndex(llGetObjectName(), "Updater") != -1)
             llSetScriptState(llGetScriptName(), FALSE);
-        }    
         key transKey="bd7d7770-39c2-d4c8-e371-0342ecf20921";
         integer primNumber=llGetNumberOfPrims()+1;
-        while (primNumber--){
+        while (primNumber--)
+        {
             integer numOfSides = llGetNumberOfSides();
-            while (numOfSides--){
+            while (numOfSides--)
+            {
                 key texture=llList2String(llGetLinkPrimitiveParams(primNumber,[PRIM_TEXTURE,numOfSides]),0);
-                if (texture == transKey || texture == TEXTURE_PLYWOOD || texture=="!totallytransparent"){
+                if (texture == transKey || texture == TEXTURE_PLYWOOD || texture=="!totallytransparent")
                     llSetLinkPrimitiveParamsFast(primNumber,[PRIM_TEXTURE,numOfSides,TEXTURE_TRANSPARENT,<1,1,1>,<0,0,0>,0]);
-                }
             }
         }
 
         DelItems(garbage);
 
-        if (llGetLinkNumber() > 1) {
-            // in a child prim.  
-            // Since we already cleaned up, we can just die now
-//            llRemoveInventory(llGetScriptName());//stops us deleting ourself
-        } else {
+        if (llGetLinkNumber() > 1)
+        { }
+        else
+        {
             // If in root prim, then ping for scripts in child prims.
             llMessageLinked(LINK_SET, UPDATE, "prepare", "");
             // and set the death timer
@@ -85,21 +85,24 @@ default
         }
     }
     
-    link_message(integer sender, integer num, string str, key id) {
-        if (num == UPDATE) {
+    link_message(integer sender, integer num, string str, key id)
+    {
+        if (num == UPDATE)
+        {
             // If a child script responds with a script pin, clone self there.
             list parts = llParseString2List(str, ["|"], []);
-            if (llGetListLength(parts) > 1) {
+            if (llGetListLength(parts) > 1)
+            {
                 integer pin = (integer)llList2String(parts, 1);
                 key prim = llGetLinkKey(sender);
-                if (pin > 0) {
+                if (pin > 0)
                     llRemoteLoadScriptPin(prim, llGetScriptName(), pin, TRUE, 1);
-                }
             }
         }
     }
     
-    timer() {
+    timer()
+    {
         llRemoveInventory(llGetScriptName());
     }
 }

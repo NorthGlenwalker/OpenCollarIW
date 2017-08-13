@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - label                                //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -148,7 +147,8 @@ ResetCharIndex() {
     // END // SALAHZAR
 }
 
-vector GetGridOffset(integer iIndex) {
+vector GetGridOffset(integer iIndex)
+{
     // Calculate the offset needed to display this character.
     integer iRow = iIndex / 10;
     integer iCol = iIndex % 10;
@@ -169,20 +169,24 @@ ShowChars(integer link,vector grkID_offset)
 integer GetIndex(string sChar)
 {
     integer  iRet=llSubStringIndex(g_sCharIndex, sChar);
-    if(iRet>=0) return iRet;
+    if(iRet>=0)
+        return iRet;
     // special char do nice trick :)
     string sEscaped=llEscapeURL(sChar);
     integer iFound=llListFindList(g_lDecode, [sEscaped]);
     // Return blank if not found
-    if(iFound<0) return 0;
+    if(iFound<0)
+        return 0;
     // return correct index
-    return 100+iFound;
+    return
+        100+iFound;
 }
 // END SALAHZAR
 
 RenderString(integer iLink, string sStr)
 {
-    if(iLink <= 0) return; // check for negative and zero linknumber
+    if(iLink <= 0)
+        return; // check for negative and zero linknumber
     // Get the grid positions for each pair of characters.
     vector GridOffset1 = GetGridOffset( GetIndex(llGetSubString(sStr, 0, 0)) ); // SALAHZAR intermediate function
     // Use these grid positions to display the correct textures/offsets.
@@ -190,17 +194,18 @@ RenderString(integer iLink, string sStr)
     ShowChars(iLink,GridOffset1);
 }
 
-integer ConvertIndex(integer iIndex) {
+integer ConvertIndex(integer iIndex)
+{
     // This converts from an ASCII based index to our indexing scheme.
     if (iIndex >= 32) // ' ' or higher
         iIndex -= 32;
-    else { // index < 32
+    else
+    { // index < 32
         // Quick bounds check.
         if (iIndex > 15)
             iIndex = 15;
         iIndex += 94; // extended characters
     }
-
     return iIndex;
 }
 /////END XYTEXT FUNCTIONS
@@ -228,7 +233,6 @@ integer LabelsCount()
         if(sLabel == "Label")
         {
             g_lLabelLinks += [0]; // fill list witn nulls
-            
             //change prim description
             llSetLinkPrimitiveParamsFast(iLink,[PRIM_DESC,"Label~notexture~nocolor~nohide"]);
         }
@@ -246,9 +250,7 @@ integer LabelsCount()
             integer iLabel = (integer)llList2String(lTmp,1);
             integer link = llList2Integer(g_lLabelLinks,iLabel);
             if(link == 0)
-            {
                 g_lLabelLinks = llListReplaceList(g_lLabelLinks,[iLink],iLabel,iLabel);
-            }
             else
             {
                 ok = FALSE;
@@ -262,7 +264,8 @@ integer LabelsCount()
 SetLabel()
 {
     string sText ;
-    if (g_iShow) sText = g_sLabelText;
+    if (g_iShow)
+        sText = g_sLabelText;
     
     string sPadding;
     if(g_iScroll==TRUE)
@@ -299,7 +302,8 @@ SetOffsets(key font)
         integer t = (integer)llList2String(params, 1);
         if (t == PRIM_TYPE_BOX)
         {
-            if (font == NULL_KEY) font = "9e47575a-f04a-4666-a4ac-f85e8073fb22"; // LCD default for box
+            if (font == NULL_KEY)
+                font = "278550c4-d65d-4430-bac8-d9668ba092c6"; // LCD default for box
             g_vGridOffset = <-0.45, 0.425, 0.0>;
             g_vRepeats = <0.126, 0.097, 0>;
             g_vOffset = <0.036, 0.028, 0>;
@@ -307,7 +311,8 @@ SetOffsets(key font)
         }
         else if (t == PRIM_TYPE_CYLINDER)
         {
-            if (font == NULL_KEY) font = "d71ee1d2-1fba-4c83-b4aa-82ac3d3ee5a3"; // Serif default for cyl
+            if (font == NULL_KEY)
+              font = "d71ee1d2-1fba-4c83-b4aa-82ac3d3ee5a3"; // Serif default for cyl
             g_vGridOffset = <-0.725, 0.425, 0.0>;
             g_vRepeats = <1.434, 0.05, 0>;
             g_vOffset = <0.037, 0.003, 0>;
@@ -317,8 +322,10 @@ SetOffsets(key font)
         integer n = llListFindList(g_lFonts, [(string)font]);
         if (~o && o != n) // changing fonts - adjust for differences in font offsets
         {
-            if (n < 8 && o == 9) g_vOffset.y += 0.0015;
-            else if (o < 8 && n == 9) g_vOffset.y -= 0.0015;
+            if (n < 8 && o == 9)
+                g_vOffset.y += 0.0015;
+            else if (o < 8 && n == 9)
+              g_vOffset.y -= 0.0015;
         }
     }
     g_kFontTexture = font;
@@ -326,12 +333,16 @@ SetOffsets(key font)
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -346,17 +357,21 @@ key Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integ
 MainMenu(key kID, integer iAuth)
 {
     list lButtons= [g_sTextMenu, g_sColorMenu, g_sFontMenu];
-    if (g_iShow) lButtons += ["☒ Show"];
-    else lButtons += ["☐ Show"];
-    if (g_iScroll) lButtons += ["☒ Scroll"];
-    else lButtons += ["☐ Scroll"];    
-    string sPrompt = "\nCustomize the " + CTYPE + "'s label!\n\nwww.opencollar.at/label";
+    if (g_iShow)
+        lButtons += ["☒ Show"];
+    else
+        lButtons += ["☐ Show"];
+    if (g_iScroll)
+        lButtons += ["☒ Scroll"];
+    else
+        lButtons += ["☐ Scroll"];    
+    string sPrompt = "\nCustomize the " + CTYPE + "'s label!";
     g_kDialogID=Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth);
 }
 
 TextMenu(key kID, integer iAuth)
 {
-    string sPrompt="\n- Submit the new label in the field below.\n- Submit a few spaces to clear the label.\n- Submit a blank field to go back to " + g_sSubMenu + ".\n\nwww.opencollar.at/label";
+    string sPrompt="\n- Submit the new label in the field below.\n- Submit a few spaces to clear the label.\n- Submit a blank field to go back to " + g_sSubMenu ;
     g_kTBoxID = Dialog(kID, sPrompt, [], [], 0, iAuth);
 }
 
@@ -375,15 +390,15 @@ ColorMenu(key kID, integer iAuth)
 FontMenu(key kID, integer iAuth)
 {
     list lButtons=llList2ListStrided(g_lFonts,0,-1,2);
-    string sPrompt = "\nSelect the font for the " + CTYPE + "'s label.\n\nNOTE: This feature requires a design with label prims. If the worn design doesn't have any of those, it is recommended to uninstall Label with the updater.\n\nwww.opencollar.at/label";
+    string sPrompt = "\nSelect the font for the " + CTYPE + "'s label.\n\nNOTE: This feature requires a design with label prims. If the worn design doesn't have any of those, it is recommended to uninstall Label with the updater.";
 
     g_kFontID=Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth);
 }
 
 integer UserCommand(integer iAuth, string sStr, key kAv)
 {
-    if (iAuth > COMMAND_WEARER || iAuth < COMMAND_OWNER) return FALSE; // sanity check
-    
+    if (iAuth > COMMAND_WEARER || iAuth < COMMAND_OWNER)
+        return FALSE; // sanity check
     if (iAuth == COMMAND_OWNER || !g_iAppLock)
     {
         if (sStr == "menu " + g_sSubMenu || llToLower(sStr)=="label") 
@@ -395,8 +410,10 @@ integer UserCommand(integer iAuth, string sStr, key kAv)
         string sCommand = llToLower(llList2String(lParams, 0));
         if (sCommand == "lockappearance" && iAuth == COMMAND_OWNER)
         {
-            if (llToLower(llList2String(lParams, 1)) == "0") g_iAppLock = FALSE;
-            else g_iAppLock = TRUE;
+            if (llToLower(llList2String(lParams, 1)) == "0")
+                g_iAppLock = FALSE;
+            else
+                g_iAppLock = TRUE;
         }        
         else if (sCommand == "labeltext")
         {
@@ -416,7 +433,8 @@ integer UserCommand(integer iAuth, string sStr, key kAv)
                 SetLabel();
                 llMessageLinked(LINK_SET, LM_SETTING_SAVE, g_sScript + "font=" + (string)g_kFontTexture, "");
             }
-            else FontMenu(kAv, iAuth);            
+            else
+                FontMenu(kAv, iAuth);            
         }
         else if (sCommand == "labelcolor")
         {
@@ -451,9 +469,7 @@ integer UserCommand(integer iAuth, string sStr, key kAv)
             Notify(kAv,"Only owners can change the label!", FALSE);
         }
         else if (sCommand=="labeltext" || sCommand == "labelfont" || sCommand == "labelcolor" || sCommand == "labelshow")
-        {
             Notify(kAv,"Only owners can change the label!", FALSE);
-        }
     }
     return TRUE;
 }
@@ -468,10 +484,8 @@ default
         integer ok = LabelsCount();
         SetOffsets(NULL_KEY);
         ResetCharIndex();
-        if (g_iCharLimit <= 0) {
+        if (g_iCharLimit <= 0)
             llMessageLinked(LINK_SET, MENUNAME_REMOVE, g_sParentMenu + "|" + g_sSubMenu, "");
-//            llRemoveInventory(llGetScriptName());// stops us deleting the script
-        }        
         g_sLabelText = llList2String(llParseString2List(llKey2Name(llGetOwner()), [" "], []), 0);
     }
 
@@ -492,20 +506,26 @@ default
             if (llGetSubString(sToken, 0, i) == g_sScript)
             {
                 sToken = llGetSubString(sToken, i + 1, -1);
-                if (sToken == "text") g_sLabelText = sValue;
-                else if (sToken == "font") SetOffsets((key)sValue);
-                else if (sToken == "color") g_vColor = (vector)sValue;
-                else if (sToken == "show") g_iShow = (integer)sValue;
-                else if (sToken == "scroll") g_iScroll = (integer)sValue;                
+                if (sToken == "text")
+                    g_sLabelText = sValue;
+                else if (sToken == "font")
+                    SetOffsets((key)sValue);
+                else if (sToken == "color")
+                    g_vColor = (vector)sValue;
+                else if (sToken == "show")
+                    g_iShow = (integer)sValue;
+                else if (sToken == "scroll")
+                    g_iScroll = (integer)sValue;                
             }
-            else if (sToken == g_sAppLockToken) g_iAppLock = (integer)sValue;
-            else if (sToken == "Global_CType") CTYPE = sValue;
-            else if (sToken == "settings" && sValue == "sent") SetLabel();
+            else if (sToken == g_sAppLockToken)
+                g_iAppLock = (integer)sValue;
+            else if (sToken == "Global_CType")
+                CTYPE = sValue;
+            else if (sToken == "settings" && sValue == "sent")
+                SetLabel();
         }
         else if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
-        {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
-        }
         else if (iNum == DIALOG_RESPONSE)
         {
             if (kID==g_kDialogID)
@@ -516,10 +536,14 @@ default
                 string sMessage = llList2String(lMenuParams, 1);
                 integer iPage = (integer)llList2String(lMenuParams, 2);
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
-                if (sMessage == UPMENU) llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                else if (sMessage == g_sTextMenu) TextMenu(kAv, iAuth);
-                else if (sMessage == g_sColorMenu) ColorMenu(kAv, iAuth);
-                else if (sMessage == g_sFontMenu) FontMenu(kAv, iAuth);
+                if (sMessage == UPMENU)
+                    llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
+                else if (sMessage == g_sTextMenu)
+                    TextMenu(kAv, iAuth);
+                else if (sMessage == g_sColorMenu)
+                    ColorMenu(kAv, iAuth);
+                else if (sMessage == g_sFontMenu)
+                    FontMenu(kAv, iAuth);
                 else if (sMessage == "☐ Show") 
                 {
                     UserCommand(iAuth, "labelshow 1", kAv);
@@ -548,7 +572,8 @@ default
                 string sMessage = llList2String(lMenuParams, 1);
                 integer iPage = (integer)llList2String(lMenuParams, 2);
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
-                if (sMessage == UPMENU) MainMenu(kAv, iAuth);
+                if (sMessage == UPMENU)
+                    MainMenu(kAv, iAuth);
                 else
                 {
                     UserCommand(iAuth, "labelcolor "+sMessage, kAv);
@@ -562,7 +587,8 @@ default
                 string sMessage = llList2String(lMenuParams, 1);
                 integer iPage = (integer)llList2String(lMenuParams, 2);
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
-                if (sMessage == UPMENU) MainMenu(kAv, iAuth);
+                if (sMessage == UPMENU)
+                    MainMenu(kAv, iAuth);
                 else
                 {
                     UserCommand(iAuth, "labelfont " + sMessage, kAv);
@@ -575,7 +601,8 @@ default
                 key kAv = (key)llList2String(lMenuParams, 0);
                 string sMessage = llList2String(lMenuParams, 1);
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
-                if (sMessage != "") UserCommand(iAuth, "labeltext " + sMessage, kAv);
+                if (sMessage != "")
+                    UserCommand(iAuth, "labeltext " + sMessage, kAv);
                 llMessageLinked(LINK_ROOT, iAuth, "menu " + g_sSubMenu, kAv);
             }
         }
@@ -590,14 +617,16 @@ default
             RenderString(llList2Integer(g_lLabelLinks, iCharPosition), llGetSubString(sText, iCharPosition, iCharPosition));
         }
         g_iSctollPos++;
-        if(g_iSctollPos > llStringLength(g_sScrollText)) g_iSctollPos = 0 ;
+        if(g_iSctollPos > llStringLength(g_sScrollText))
+            g_iSctollPos = 0 ;
     }
 
     changed(integer change)
     {
         if(change & CHANGED_LINK) // if links changed
         {
-            if (LabelsCount()==TRUE) SetLabel();
+            if (LabelsCount()==TRUE)
+                SetLabel();
         }
     }
 }

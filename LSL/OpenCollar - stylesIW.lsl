@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
-//                              OpenCollar - styles                               //
-//                                 version 3.992                                  //
+//                              OpenCollar - stylesIW                             //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,16 +52,24 @@ Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integer i
     
     integer iMenuIndex = llListFindList(g_lMenuIDs, [kRCPT]);
     list lAddMe = [kRCPT, kID, menuType];
-    if (iMenuIndex == -1) g_lMenuIDs += lAddMe;
-    else g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);
+    if (iMenuIndex == -1)
+        g_lMenuIDs += lAddMe;
+    else
+        g_lMenuIDs = llListReplaceList(g_lMenuIDs, lAddMe, iMenuIndex, iMenuIndex + g_iMenuStride - 1);
 } 
 
-Notify(key kID, string sMsg, integer iAlsoNotifyWearer) {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
-    else {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
+{
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
+    else
+    {
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -83,7 +90,8 @@ SetStyle(string sStyle, integer iAuth, key kAv)
             while (index++ >= 0)
             {            
                 string setting = llList2String(g_lStyleSettings,index);
-                if (~llListFindList(g_lStyles,[setting]) || setting == "") index = -1;
+                if (~llListFindList(g_lStyles,[setting]) || setting == "")
+                    index = -1;
                 else
                 {                  
                     list lParams = llParseString2List(setting,["~"],[]);
@@ -91,11 +99,14 @@ SetStyle(string sStyle, integer iAuth, key kAv)
                     if (element != "")
                     {
                         string texture = llStringTrim(llList2String(lParams,1),STRING_TRIM);
-                        if (texture != "") llMessageLinked(LINK_SET, iAuth, "settexture " + element+" "+texture, kAv);
+                        if (texture != "")
+                            llMessageLinked(LINK_SET, iAuth, "settexture " + element+" "+texture, kAv);
                         string color = llStringTrim(llList2String(lParams,2),STRING_TRIM);
-                        if (color != "") llMessageLinked(LINK_SET, iAuth, "setcolor " + element+" "+color, kAv);
+                        if (color != "")
+                            llMessageLinked(LINK_SET, iAuth, "setcolor " + element+" "+color, kAv);
                         string shine = llStringTrim(llList2String(lParams,3),STRING_TRIM);
-                        if (shine != "") llMessageLinked(LINK_SET, iAuth, "setshiny " + element+" "+shine, kAv);
+                        if (shine != "")
+                            llMessageLinked(LINK_SET, iAuth, "setshiny " + element+" "+shine, kAv);
                     }
                 }
             }
@@ -105,17 +116,21 @@ SetStyle(string sStyle, integer iAuth, key kAv)
 
 AddElementSetting(string element, string value, integer n )
 {
-    if (element =="") return ;
+    if (element =="")
+        return ;
     string params;
     integer i = llListFindList(g_lElementsSettings, [element]);    
-    if (i==-1)
+    if (i==-1)//makes new element
     {
-        if(n==0) params = value+"~ ~ ";
-        if(n==1) params = " ~"+value+"~ ";
-        if(n==2) params = " ~ ~"+value;
+        if(n==0)
+            params = value+"~ ~ ";
+        if(n==1)
+            params = " ~"+value+"~ ";
+        if(n==2)
+            params = " ~ ~"+value;
         g_lElementsSettings += [element, params];
     }
-    else
+    else //adjusts existing element
     {
         string sParams = llList2String(g_lElementsSettings,i+1);
         list lParams = llParseString2List(sParams,["~"],[]);        
@@ -128,7 +143,8 @@ AddElementSetting(string element, string value, integer n )
 
 integer UserCommand(integer iAuth, string sStr, key kAv, integer remenu) 
 {
-    if (iAuth > COMMAND_WEARER || iAuth < COMMAND_OWNER) return FALSE; // sanity check
+    if (iAuth > COMMAND_WEARER || iAuth < COMMAND_OWNER)
+        return FALSE; // sanity check
     list lParams = llParseString2List(sStr, [" "], []);
     string sCommand = llList2String(lParams, 0);
     if (sStr == "menu "+ g_sSubMenu || llToLower(sStr) == "styles")
@@ -143,13 +159,16 @@ integer UserCommand(integer iAuth, string sStr, key kAv, integer remenu)
             Notify(kAv, "The appearance of the " + CTYPE + " is locked. You cannot access this menu now!", FALSE);
             llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
         }
-        else StyleMenu(kAv, iAuth);
+        else
+            StyleMenu(kAv, iAuth);
     }
     else if (sCommand == "lockappearance" && iAuth == COMMAND_OWNER)
     {
         string sValue = llStringTrim(llDeleteSubString(sStr,0,llStringLength(sCommand)),STRING_TRIM);
-        if(sValue == "0") g_iAppLock = FALSE;
-        if(sValue == "1") g_iAppLock = TRUE;
+        if(sValue == "0")
+            g_iAppLock = FALSE;
+        if(sValue == "1")
+            g_iAppLock = TRUE;
     }
     else if (sCommand == "style" && !g_iAppLock)
     {
@@ -159,13 +178,16 @@ integer UserCommand(integer iAuth, string sStr, key kAv, integer remenu)
             SetStyle(sValue, iAuth, kAv);
             llMessageLinked(LINK_THIS, LM_SETTING_SAVE, "styles_style=" + sValue, "");
         }        
-        else Notify(kAv,"Unrecognised style: "+sValue+" not in '"+llDumpList2String(g_lStyles,",")+"'",FALSE);
-        if (remenu) StyleMenu(kAv, iAuth);
+        else
+            Notify(kAv,"Unrecognised style: "+sValue+" not in '"+llDumpList2String(g_lStyles,",")+"'",FALSE);
+        if (remenu)
+            StyleMenu(kAv, iAuth);
     }
     else if (sStr == "dumpstyle")
     {        
         DumpSettings(kAv,"~");
-        if (remenu) StyleMenu(kAv, iAuth);
+        if (remenu)
+            StyleMenu(kAv, iAuth);
     }
     return TRUE ;
 }
@@ -177,9 +199,7 @@ DumpSettings(key kAv, string sep)
     string out = "\n# Copy all below into '"+g_sNotecardName+"' notecard and change 'New Style' to own style name:\n\n[ New Style ]\n";
     integer i;
     for (i = 0; i < llGetListLength(g_lElementsSettings); i += 2)
-    {
         out += llList2String(g_lElementsSettings, i)+sep+llList2String(g_lElementsSettings, i+1)+"\n";
-    }    
     Notify(kAv,out,FALSE);
 }
 
@@ -192,6 +212,8 @@ default
     
     state_entry() 
     {
+        if (llGetInventoryType( g_sNotecardName ) != 7)//if .styles noteard don't exist then make one
+            iwMakeNotecard( g_sNotecardName, [ ] );
         g_kWearer = llGetOwner();
         g_iNotecardId = llGetInventoryKey(g_sNotecardName);
         if(g_iNotecardId)
@@ -203,11 +225,10 @@ default
     
     link_message(integer iSender, integer iNum, string sStr, key kID) 
     {
-        if (UserCommand(iNum, sStr, kID, FALSE)) return;
+        if (UserCommand(iNum, sStr, kID, FALSE))
+            return;
         if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu) 
-        {
             llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
-        } 
         else if (iNum == LM_SETTING_RESPONSE) 
         {
             list lParams = llParseString2List(sStr, ["="], []);
@@ -215,12 +236,18 @@ default
             string sGroup = llList2String(llParseString2List(sGroupToken,["_"],[]),0);
             string sToken = llList2String(llParseString2List(sGroupToken,["_"],[]),1);
             string sValue = llList2String(lParams, 1);            
-            if (sToken == "CType") CTYPE = sValue;
-            else if (sGroup == "texture") AddElementSetting(sToken, sValue, 0);
-            else if (sGroup == "color") AddElementSetting(sToken, sValue, 1);
-            else if (sGroup == "shininess") AddElementSetting(sToken, sValue, 2);
-            else if (sGroupToken == "styles_style") g_sStyle = sValue; // SetStyle(sValue,COMMAND_WEARER,g_kWearer); 
-            else if (sGroupToken == g_sAppLockToken) g_iAppLock = (integer)sValue;
+            if (sToken == "CType")
+                CTYPE = sValue;
+            else if (sGroup == "textureIW")
+                AddElementSetting(sToken, sValue, 0);
+            else if (sGroup == "color")
+                AddElementSetting(sToken, sValue, 1);
+            else if (sGroup == "shininess")
+                AddElementSetting(sToken, sValue, 2);
+            else if (sGroupToken == "styles_style")
+                g_sStyle = sValue; // SetStyle(sValue,COMMAND_WEARER,g_kWearer); 
+            else if (sGroupToken == g_sAppLockToken)
+                g_iAppLock = (integer)sValue;
         }
         else if (iNum == LM_SETTING_SAVE) 
         {
@@ -229,11 +256,16 @@ default
             string sGroup = llList2String(llParseString2List(sGroupToken,["_"],[]),0);
             string sToken = llList2String(llParseString2List(sGroupToken,["_"],[]),1);
             string sValue = llList2String(lParams, 1);
-            if (sToken == "CType") CTYPE = sValue;
-            else if (sGroup == "texture") AddElementSetting(sToken, sValue, 0);
-            else if (sGroup == "color") AddElementSetting(sToken, sValue, 1);
-            else if (sGroup == "shininess") AddElementSetting(sToken, sValue, 2);
-            else if (sGroupToken == g_sAppLockToken) g_iAppLock = (integer)sValue;
+            if (sToken == "CType")
+                CTYPE = sValue;
+            else if (sGroup == "textureIW")
+                AddElementSetting(sToken, sValue, 0);
+            else if (sGroup == "color")
+                AddElementSetting(sToken, sValue, 1);
+            else if (sGroup == "shininess")
+                AddElementSetting(sToken, sValue, 2);
+            else if (sGroupToken == g_sAppLockToken)
+                g_iAppLock = (integer)sValue;
         } 
         else if (iNum == DIALOG_RESPONSE) 
         {
@@ -251,24 +283,29 @@ default
                 
                 if (sMenuType == "StyleMenu") 
                 {  //lists all elements in the collar
-                    if (sMessage == UPMENU) llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                    else if (sMessage == DUMP) UserCommand(iAuth,"dumpstyle", kAv, TRUE);
-                    else UserCommand(iAuth,"style "+sMessage, kAv, TRUE);
+                    if (sMessage == UPMENU)
+                        llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
+                    else if (sMessage == DUMP)
+                        UserCommand(iAuth,"dumpstyle", kAv, TRUE);
+                    else
+                        UserCommand(iAuth,"style "+sMessage, kAv, TRUE);
                 }
             }
         } 
         else if (iNum == DIALOG_TIMEOUT) 
         {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
-            if (~iMenuIndex) {  //remove stride from g_lMenuIDs
-                g_lMenuIDs = llDeleteSubList(g_lMenuIDs, iMenuIndex - 1, iMenuIndex - 2 + g_iMenuStride);                          
-            }            
+            if (~iMenuIndex) //remove stride from g_lMenuIDs
+                g_lMenuIDs = llDeleteSubList(g_lMenuIDs, iMenuIndex - 1, iMenuIndex - 2 + g_iMenuStride);
         }
     }
     
-    dataserver(key id, string data){
-        if (id == g_kNotecardReadRequest){
-            if (data != EOF){
+    dataserver(key id, string data)
+    {
+        if (id == g_kNotecardReadRequest)
+        {
+            if (data != EOF)
+            {
                 data = llStringTrim(data,STRING_TRIM);
                 if (data != "" && llGetSubString(data,0,0) != "#" )
                 {
@@ -280,20 +317,22 @@ default
                         g_lStyleSettings += [g_sNotecardStyle];
                     }
                     else
-                    {
-                        g_lStyleSettings += [data];          
-                    }
+                        g_lStyleSettings += [data];
                 }
                 g_kNotecardReadRequest=llGetNotecardLine(g_sNotecardName,++g_iNotecardLine);
             }
         }
     }
     
-    changed (integer change){
-        if (change & CHANGED_INVENTORY){
-            if (g_iNotecardId != llGetInventoryKey(g_sNotecardName)){
+    changed (integer change)
+    {
+        if (change & CHANGED_INVENTORY)
+        {
+            if (g_iNotecardId != llGetInventoryKey(g_sNotecardName))
+            {
                 g_iNotecardId = llGetInventoryKey(g_sNotecardName);
-                if(g_iNotecardId){
+                if(g_iNotecardId)
+                {
                     g_lStyles=[];
                     g_lStyleSettings=[];
                     g_iNotecardLine=0;
@@ -301,6 +340,7 @@ default
                 }
             }            
         }
-        if (change & CHANGED_OWNER) llResetScript();            
+        if (change & CHANGED_OWNER)
+            llResetScript();            
     }
 }

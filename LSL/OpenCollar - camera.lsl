@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                              OpenCollar - camera                               //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,17 +28,24 @@ vector g_vCamPos;
 rotation g_rCamRot;
 integer g_rBroadChan;
 
-//a 2-strided list in the form modename,camparams, where camparams is a serialized list
 list g_lModes = [
-"default", "|/?!@#|12|0",//[CAMERA_ACTIVE, FALSE]
-"human", "|/?!@#|12|1|8/0.000000|9/0.000000|7/2.500000|6/0.050000|22|0|11/0.000000|0/20.000000|5/0.000000|21|0|10/0.000000|1@<0.000000, 0.000000, 0.350000>",
-"1stperson", "|/?!@#|12|1|7/0.500000|1@<2.500000, 0.000000, 1.000000>", //CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <2.5,0,1.0>]]
-"ass", "|/?!@#|12|1|7/0.500000",//[CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5]
-"far", "|/?!@#|12|1|7/10.000000", //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0]]
-"god", "|/?!@#|12|1|7/10.000000|0/80.000000", //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0,CAMERA_PITCH, 80.0]]
-"ground", "|/?!@#|12|1|0/-15.000000",//[CAMERA_ACTIVE, TRUE, CAMERA_PITCH, -15.0]
-"worm", "|/?!@#|12|1|7/0.500000|1@<0.000000, 0.000000, -0.750000>|0/-15.000000" //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <0,0,-0.75>, CAMERA_PITCH, -15.0]
+"default", "listdefault",//[CAMERA_ACTIVE, FALSE]
+"human", "listhuman",
+"1stperson", "list1stperson", //CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <2.5,0,1.0>]]
+"ass", "listass",//[CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5]
+"far", "listfar", //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0]]
+"god", "listgod", //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0,CAMERA_PITCH, 80.0]]
+"ground", "listground",//[CAMERA_ACTIVE, TRUE, CAMERA_PITCH, -15.0]
+"worm", "listworm" //[CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <0,0,-0.75>, CAMERA_PITCH, -15.0]
 ];
+list listdefault = [CAMERA_ACTIVE, FALSE];
+list listhuman = [12,1,8,0.000000,9,0.000000,7,2.500000,6,0.050000,22,0,11,0.000000,0,20.000000,5,0.000000,21,0,10,0.000000,1,<0.000000, 0.000000, 0.350000>];
+list list1stperson = [CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <2.5,0,1.0>];
+list listass = [CAMERA_ACTIVE, TRUE, CAMERA_DISTANCE, 0.5];
+list listfar = [CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0];
+list listgod = [CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 10.0,CAMERA_PITCH, 80.0];
+list listground = [CAMERA_ACTIVE, TRUE, CAMERA_PITCH, -15.0];
+list listworm = [CAMERA_ACTIVE, TRUE,CAMERA_DISTANCE, 0.5,CAMERA_FOCUS_OFFSET, <0,0,-0.75>, CAMERA_PITCH, -15.0];
 
 //MESSAGE MAP
 integer COMMAND_NOAUTH = 0;
@@ -72,14 +78,30 @@ CamMode(string sMode)
 {
     llClearCameraParams();
     integer iIndex = llListFindList(g_lModes, [sMode]);
-    string lParams = llList2String(g_lModes, iIndex + 1);    
-    llSetCameraParams(TightListTypeParse(lParams));  
+    string lParams = llList2String(g_lModes, iIndex + 1);  
+    if(lParams == "listdefault")
+        llSetCameraParams(listdefault);
+    else if(lParams == "listhuman")
+        llSetCameraParams(listhuman);
+    else if(lParams == "list1stperson")
+        llSetCameraParams(list1stperson);
+    else if(lParams == "listass")
+        llSetCameraParams(listass);
+    else if(lParams == "listfar")
+        llSetCameraParams(listfar);
+    else if(lParams == "listgod")
+        llSetCameraParams(listgod);
+    else if(lParams == "listground")
+        llSetCameraParams(listground);
+    else if(lParams == "listworm")
+        llSetCameraParams(listworm);
     g_sCurrentMode = sMode;
 }
 
 ClearCam()
 {
-    if (llGetPermissions()&PERMISSION_CONTROL_CAMERA) llClearCameraParams();
+    if (llGetPermissions()&PERMISSION_CONTROL_CAMERA)
+        llClearCameraParams();
     g_iLastNum = 0;    
     g_iSync2Me = FALSE;
     llMessageLinked(LINK_SET, LM_SETTING_DELETE, g_sScript + "all", "");    
@@ -92,10 +114,8 @@ CamFocus(vector g_vCamPos, rotation g_rCamRot)
     float fSteps = 8.0;
     //Keep fSteps a float, but make sure its rounded off to the nearest 1.0
     fSteps = (float)llRound(fSteps);
- 
     //Calculate camera position increments
     vector vPosStep = (g_vCamPos - vStartPose) / fSteps;
- 
     //Calculate camera rotation increments
     //rotation rStep = (g_rCamRot - rStartRot);
     //rStep = <rStep.x / fSteps, rStep.y / fSteps, rStep.z / fSteps, rStep.s / fSteps>;
@@ -105,7 +125,6 @@ CamFocus(vector g_vCamPos, rotation g_rCamRot)
         //Set next position in tween
         vector vNextPos = vStartPose + (vPosStep * fCurrentStep);
         rotation rNextRot = Slerp( rStartRot, g_rCamRot, fCurrentStep / fSteps);
- 
         //Set camera parameters
         llSetCameraParams([
             CAMERA_ACTIVE, 1, //1 is active, 0 is inactive
@@ -125,7 +144,8 @@ CamFocus(vector g_vCamPos, rotation g_rCamRot)
     }
 }
  
-rotation Slerp( rotation a, rotation b, float f ) {
+rotation Slerp( rotation a, rotation b, float f )
+{
     float fAngleBetween = llAngleBetween(a, b);
     if ( fAngleBetween > PI )
         fAngleBetween = fAngleBetween - TWO_PI;
@@ -151,15 +171,12 @@ key Dialog(key kRCPT, string sPrompt, list lChoices, list lUtilityButtons, integ
 
 CamMenu(key kID, integer iAuth)
 {
-    string sPrompt = "\nCurrent camera mode is " + g_sCurrentMode + ".\n\nwww.opencollar.at/camera";
+    string sPrompt = "\nCurrent camera mode is " + g_sCurrentMode;
     list lButtons = ["CLEAR"];
     integer n;
     integer stop = llGetListLength(g_lModes);    
     for (n = 0; n < stop; n +=2)
-    {
         lButtons += [Capitalize(llList2String(g_lModes, n))];
-    }
-    
     lButtons += ["FREEZE"];
     g_kMenuID = Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth);
 }
@@ -188,82 +205,18 @@ string StrReplace(string sSrc, string sFrom, string sTo)
     return sSrc;
 }
 
-//These TightListType functions allow serializing a list to a string, and deserializing it back, while preserving variable type information.  We use them so we can have a list of camera modes, where each mode is itself a list
-integer TightListTypeLength(string sInput)
-{
-    string sSeperators = llGetSubString(sInput,(0),6);
-    return ((llParseStringKeepNulls(llDeleteSubString(sInput,(0),5), [],[sInput=llGetSubString(sSeperators,(0),(0)),
-           llGetSubString(sSeperators,1,1),llGetSubString(sSeperators,2,2),llGetSubString(sSeperators,3,3),
-           llGetSubString(sSeperators,4,4),llGetSubString(sSeperators,5,5)]) != []) + (llSubStringIndex(sSeperators,llGetSubString(sSeperators,6,6)) < 6)) >> 1;
-}
- 
-integer TightListTypeEntryType(string sInput, integer iIndex)
-{
-    string sSeperators = llGetSubString(sInput,(0),6);
-    return llSubStringIndex(sSeperators, sInput) + ((sInput = llList2String(llList2List(sInput + llParseStringKeepNulls(llDeleteSubString(sInput,(0),5), [],[sInput=llGetSubString(sSeperators,(0),(0)), llGetSubString(sSeperators,1,1),llGetSubString(sSeperators,2,2),llGetSubString(sSeperators,3,3), llGetSubString(sSeperators,4,4),llGetSubString(sSeperators,5,5)]), (llSubStringIndex(sSeperators,llGetSubString(sSeperators,6,6)) < 6) << 1, -1),  iIndex << 1)) != "");
-}
- 
-list TightListTypeParse(string sInput) {
-    list lPartial;
-    if(llStringLength(sInput) > 6)
-    {
-        string sSeperators = llGetSubString(sInput,(0),6);
-        integer iPos = ([] != (lPartial = llList2List(sInput + llParseStringKeepNulls(llDeleteSubString(sInput,(0),5), [],[sInput=llGetSubString(sSeperators,(0),(0)), llGetSubString(sSeperators,1,1),llGetSubString(sSeperators,2,2),llGetSubString(sSeperators,3,3), llGetSubString(sSeperators,4,4),llGetSubString(sSeperators,5,5)]), (llSubStringIndex(sSeperators,llGetSubString(sSeperators,6,6)) < 6) << 1, -1)));
-        integer iType = (0);
-        integer iSubPos = (0);
-        do
-        {
-            list s_Current = (list)(sInput = llList2String(lPartial, iSubPos= -~iPos));//TYPE_STRING || TYPE_INVALID (though we don't care about invalid)
-            if(!(iType = llSubStringIndex(sSeperators, llList2String(lPartial,iPos))))//TYPE_INTEGER
-                s_Current = (list)((integer)sInput);
-            else if(iType == 1)//TYPE_FLOAT
-                s_Current = (list)((float)sInput);
-            else if(iType == 3)//TYPE_KEY
-                s_Current = (list)((key)sInput);
-            else if(iType == 4)//TYPE_VECTOR
-                s_Current = (list)((vector)sInput);
-            else if(iType == 5)//TYPE_ROTATION
-                s_Current = (list)((rotation)sInput);
-            lPartial = llListReplaceList(lPartial, s_Current, iPos, iSubPos);
-        }while((iPos= -~iSubPos) & 0x80000000);
-    }
-    return lPartial;
-}
- 
-string TightListTypeDump(list lInput, string sSeperators) {//This function is dangerous
-    sSeperators += "|/?!@#$%^&*()_=:;~`'<>{}[],.\n\" qQxXzZ\\";
-    string sCumulator = (string)(lInput);
-    integer iCounter = (0);
-    do
-        if(~llSubStringIndex(sCumulator,llGetSubString(sSeperators,iCounter,iCounter)))
-            sSeperators = llDeleteSubString(sSeperators,iCounter,iCounter);
-        else
-            iCounter = -~iCounter;
-    while(iCounter<6);
-    sSeperators = llGetSubString(sSeperators,(0),5);
- 
-        sCumulator =  "";
- 
-    if((iCounter = (lInput != [])))
-    {
-        do
-        {
-            integer iType = ~-llGetListEntryType(lInput, iCounter = ~-iCounter);
- 
-            sCumulator = (sCumulator = llGetSubString(sSeperators,iType,iType)) + llList2String(lInput,iCounter) + sCumulator;
-        }while(iCounter);
-    }
-    return sSeperators + sCumulator;
-}
-
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -281,13 +234,9 @@ ChatCamParams(integer chan)
     string sPosLine = StrReplace((string)g_vCamPos, " ", "") + " " + StrReplace((string)g_rCamRot, " ", ""); 
     //if not channel 0, say to whole region.  else just say locally   
     if (chan)
-    {
-        llRegionSay(chan, sPosLine);                    
-    }
+        llRegionSay(chan, sPosLine);
     else
-    {
         llSay(chan, sPosLine);
-    }
 }
 
 integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value, sStr: user command, kID: avatar id
@@ -297,14 +246,12 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
     string sCommand = llList2String(lParams, 0);
     string sValue = llList2String(lParams, 1);
     string sValue2 = llList2String(lParams, 2);
-    if (sStr == "menu " + g_sMyMenu) {
+    if (sStr == "menu " + g_sMyMenu)
         CamMenu(kID, iNum);
-    }
     else if (sCommand == "cam" || sCommand == "camera")
     {
         if (sValue == "")
-        {
-            //they just said *cam.  give menu
+        {//they just said *cam.  give menu
             CamMenu(kID, iNum);
             return TRUE;
         }
@@ -346,9 +293,7 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
                 SaveSetting(sValue);
             }
             else
-            {
                 Notify(kID, "Invalid camera mode: " + sValue, FALSE);
-            }
         }
     } 
     else if (sCommand == "camto")
@@ -359,9 +304,7 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
             g_iLastNum = iNum;                    
         }
         else
-        {
             Notify(kID, "Sorry, cam settings have already been set by someone outranking you.", FALSE);
-        }
     }
     else if (sCommand == "camdump")
     {
@@ -393,33 +336,28 @@ default
     {
         g_sScript = llStringTrim(llList2String(llParseString2List(llGetScriptName(), ["-"], []), 1), STRING_TRIM) + "_";
         if (llGetAttached())
-        {
             llRequestPermissions(llGetOwner(), PERMISSION_CONTROL_CAMERA | PERMISSION_TRACK_CAMERA);
-        }
         g_kWearer = llGetOwner();
     }
     
     run_time_permissions(integer iPerms)
     {
         if (iPerms & (PERMISSION_CONTROL_CAMERA | PERMISSION_TRACK_CAMERA))
-        {
             llClearCameraParams();
-        }
     }
     
     link_message(integer iSender, integer iNum, string sStr, key kID)
     {
         //only respond to owner, secowner, group, wearer
-        if (UserCommand(iNum, sStr, kID)) return;
+        if (UserCommand(iNum, sStr, kID))
+            return;
         else if (iNum == COMMAND_SAFEWORD)
         {
             ClearCam();
             llResetScript();
         }
         else if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
-        {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sMyMenu, "");
-        }    
         else if (iNum == LM_SETTING_RESPONSE)
         {
             list lParams = llParseString2List(sStr, ["=", ","], []);
@@ -431,8 +369,10 @@ default
                 sToken = llGetSubString(sToken, i + 1, -1);
                 if (llGetPermissions() & PERMISSION_CONTROL_CAMERA)
                 {
-                    if (sToken == "freeze") LockCam();
-                    else if (~llListFindList(g_lModes, [sToken])) CamMode(sToken);
+                    if (sToken == "freeze")
+                        LockCam();
+                    else if (~llListFindList(g_lModes, [sToken]))
+                        CamMode(sToken);
                     g_iLastNum = (integer)sValue;
                 }
             }           
@@ -447,9 +387,7 @@ default
                 string sMessage = llList2String(lMenuParams, 1);                                         
                 integer iAuth = (integer)llList2String(lMenuParams, 3); 
                 if (sMessage == UPMENU)
-                {
                     llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                }
                 else
                 {
                     UserCommand(iAuth, "cam " + llToLower(sMessage), kAv);
@@ -467,13 +405,9 @@ default
             vector vNewPos = llGetCameraPos();
             rotation rNewRot = llGetCameraRot();
             if (vNewPos != g_vCamPos || rNewRot != g_rCamRot)
-            {
                 ChatCamParams(g_rBroadChan);
-            }
         }
         else
-        {
-            llSetTimerEvent(0.0);            
-        }
+            llSetTimerEvent(0.0);
     }    
 }

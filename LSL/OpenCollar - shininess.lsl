@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                            OpenCollar - shininess                              //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 //based on OpenCollar - texture
@@ -73,20 +72,26 @@ key TouchRequest(key kRCPT,  integer iTouchStart, integer iTouchEnd, integer iAu
 {
     key kID = llGenerateKey();
     integer iFlags = 0;
-    if (iTouchStart) iFlags = iFlags | 0x01;
-    if (iTouchEnd) iFlags = iFlags | 0x02;
+    if (iTouchStart)
+        iFlags = iFlags | 0x01;
+    if (iTouchEnd)
+        iFlags = iFlags | 0x02;
     llMessageLinked(LINK_THIS, TOUCH_REQUEST, (string)kRCPT + "|" + (string)iFlags + "|" + (string)iAuth, kID);
     return kID;
 }
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -111,13 +116,9 @@ string ElementType(integer iLinkNumber)
     //not appear in the shiny menu
     list lParams = llParseString2List(sDesc, ["~"], []);
     if ((~(integer)llListFindList(lParams, [g_sIgnoreType])) || sDesc == "" || sDesc == " " || sDesc == "(No Description)")
-    {
         return g_sIgnoreType;
-    }
     else
-    {
         return llList2String(lParams, 0);
-    }
 }
 
 BuildElementList()
@@ -129,9 +130,7 @@ BuildElementList()
     {
         string sElement = ElementType(n);
         if (!(~llListFindList(g_lElements, [sElement])) && sElement != g_sIgnoreType)
-        {
             g_lElements += [sElement];
-        }
     }
 }
 
@@ -144,7 +143,8 @@ SetAllShiny(integer iShiny)
         string sElement = llList2String(g_lElements, index);
         SetElementShiny(sElement, iShiny);
         index++ ;
-    }while (index < elements ) ;
+    }
+    while (index < elements ) ;
 }
 
 SetElementShiny(string sElement, integer iShiny)
@@ -162,9 +162,7 @@ SetElement(string sElement, integer iShiny)
     for (n = 2; n <= iLinkCount; n++)
     {
         if (ElementType(n) == sElement)
-        {
             llSetLinkPrimitiveParamsFast(n,[PRIM_BUMP_SHINY,ALL_SIDES,iShiny,0]);
-        }
     }
 }
 
@@ -172,13 +170,9 @@ AddShinySettings(string sElement, integer iShiny)
 {
     integer i = llListFindList(g_lShinySettings, [sElement]);
     if (i == -1)
-    {
         g_lShinySettings += [sElement, iShiny];
-    }
     else
-    {
         g_lShinySettings = llListReplaceList(g_lShinySettings, [iShiny], i+1, i+1);
-    }
 }
 
 UpdateElements()
@@ -191,13 +185,15 @@ UpdateElements()
         integer iShiny =  llList2Integer(g_lShinySettings, i+1);        
         SetElement(sElement, iShiny);
         i+=2 ;
-    }while (i < elements ) ;
+    }
+    while (i < elements ) ;
 }
 
 // returns TRUE if eligible (AUTHED link message number)
 integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value, sStr: user command, kID: avatar id
 {
-    if (iNum > COMMAND_WEARER || iNum < COMMAND_OWNER) return FALSE; // sanity check
+    if (iNum > COMMAND_WEARER || iNum < COMMAND_OWNER)
+        return FALSE; // sanity check
     list lParams = llParseString2List(sStr, [" "], []);
     string sCommand = llList2String(lParams, 0);
     if (sStr == "menu "+ g_sSubMenu || sStr == "shiny")
@@ -221,13 +217,9 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
     if (sCommand == "setshiny")
     {
         if (kID!=g_kWearer && iNum!=COMMAND_OWNER)
-        {
             Notify(kID,"You are not allowed to change the shiny.", FALSE);
-        }
         else if (g_iAppLock)
-        {
             Notify(kID,"The appearance of the "+CTYPE+" is locked. You cannot access this menu now!", FALSE);
-        }
         else
         {
             string sElement = llList2String(lParams, 1);
@@ -238,7 +230,8 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
     }
     else if (sCommand == "lockappearance")
     {
-        if (iNum == COMMAND_OWNER) g_iAppLock = llList2Integer(lParams, 1);
+        if (iNum == COMMAND_OWNER)
+            g_iAppLock = llList2Integer(lParams, 1);
     }
     return TRUE;
 }
@@ -247,9 +240,12 @@ integer UserCommand(integer iNum, string sStr, key kID) // here iNum: auth value
 string SplitTokenValue(string in, integer slot)
 {
     string out ;
-    if (slot==0) out = llGetSubString(in, 0,  llSubStringIndex(in, "_") );
-    else if (slot==1) out = llGetSubString(in, llSubStringIndex(in, "_")+1, llSubStringIndex(in, "=")-1);
-    else if (slot==2) out = llGetSubString(in, llSubStringIndex(in, "=")+1, -1);
+    if (slot==0)
+        out = llGetSubString(in, 0,  llSubStringIndex(in, "_") );
+    else if (slot==1)
+        out = llGetSubString(in, llSubStringIndex(in, "_")+1, llSubStringIndex(in, "=")-1);
+    else if (slot==2)
+        out = llGetSubString(in, llSubStringIndex(in, "=")+1, -1);
     return out ;
 }
 
@@ -270,21 +266,24 @@ default
 
     link_message(integer iSender, integer iNum, string sStr, key kID)
     {
-        if (UserCommand(iNum, sStr, kID)) {return;}
+        if (UserCommand(iNum, sStr, kID))
+            return;
         else if (iNum == LM_SETTING_RESPONSE)
         {
             string sGroup = SplitTokenValue(sStr, 0);
             string sToken = SplitTokenValue(sStr, 1);
             string sValue = SplitTokenValue(sStr, 2);
-            if (sGroup == g_sScript) AddShinySettings(sToken, (integer)sValue);            
-            else if (sGroup+sToken == g_sAppLockToken) g_iAppLock = (integer)sValue;            
-            else if (sGroup+sToken == "Global_CType") CTYPE = sValue;
-            else if (sStr == "settings=sent") UpdateElements();
+            if (sGroup == g_sScript)
+                AddShinySettings(sToken, (integer)sValue);            
+            else if (sGroup+sToken == g_sAppLockToken)
+                g_iAppLock = (integer)sValue;            
+            else if (sGroup+sToken == "Global_CType")
+                CTYPE = sValue;
+            else if (sStr == "settings=sent")
+                UpdateElements();
         }
         else if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
-        {
             llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
-        }
         else if (iNum == DIALOG_RESPONSE)
         {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
@@ -299,11 +298,8 @@ default
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
                 if (sMessage == UPMENU)
                 {
-                    if (g_sCurrentElement == "")
-                    {
-                        //main menu
+                    if (g_sCurrentElement == "")//main menu
                         llMessageLinked(LINK_THIS, iAuth, "menu "+g_sParentMenu, kAv);
-                    }
                     else
                     {
                         g_sCurrentElement = "" ;
@@ -324,8 +320,10 @@ default
                 else if (~(integer)llListFindList(g_lShiny, [sMessage]))
                 {
                     integer iShiny = llListFindList(g_lShiny, [sMessage]);
-                    if(g_sCurrentElement == ALL) SetAllShiny(iShiny);
-                    else SetElementShiny(g_sCurrentElement, iShiny);
+                    if(g_sCurrentElement == ALL)
+                        SetAllShiny(iShiny);
+                    else
+                        SetElementShiny(g_sCurrentElement, iShiny);
                     ShinyMenu(kAv, iAuth);
                 }
             }
@@ -334,9 +332,7 @@ default
         {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
             if (iMenuIndex != -1)
-            {
                 g_lMenuIDs=llDeleteSubList(g_lMenuIDs,iMenuIndex,iMenuIndex);
-            }
         }
         else if (iNum == TOUCH_RESPONSE)
         {

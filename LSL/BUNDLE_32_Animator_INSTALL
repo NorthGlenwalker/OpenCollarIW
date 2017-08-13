@@ -16,7 +16,6 @@ ITEM|~walk_Worm
 ITEM|~run
 ITEM|~stiff
 SCRIPT|OpenCollar - animIW
-ITEM|coupleanims
 ITEM|~sub-hug
 ITEM|~hug
 ITEM|~kiss
@@ -30,6 +29,7 @@ ITEM|~bootlick
 ITEM|~extendfoot
 ITEM|~jumphug
 ITEM|~jumphold
+ITEM|~PostureOverride
 ITEM|beautystand
 ITEM|belly
 ITEM|bendover

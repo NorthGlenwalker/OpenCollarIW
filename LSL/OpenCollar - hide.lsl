@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                               OpenCollar - hide                                //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -64,12 +63,16 @@ integer g_iHasElements = FALSE;
 
 Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
 {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
     else
     {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID,0,sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID,0,sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
@@ -96,8 +99,10 @@ key TouchRequest(key kRCPT,  integer iTouchStart, integer iTouchEnd, integer iAu
 {
     key kID = llGenerateKey();
     integer iFlags = 0;
-    if (iTouchStart) iFlags = iFlags | 0x01;
-    if (iTouchEnd) iFlags = iFlags | 0x02;
+    if (iTouchStart)
+        iFlags = iFlags | 0x01;
+    if (iTouchEnd)
+        iFlags = iFlags | 0x02;
     llMessageLinked(LINK_SET, TOUCH_REQUEST, (string)kRCPT + "|" + (string)iFlags + "|" + (string)iAuth, kID);
     return kID;
 } 
@@ -121,7 +126,8 @@ UpdateElementAlpha(string element_to_set, integer iAlpha)
 
 SetAllElementsAlpha(integer iAlpha)
 {
-    if(g_iAllAlpha == iAlpha) return ;
+    if(g_iAllAlpha == iAlpha)
+        return ;
     g_iAllAlpha = iAlpha ;
     if(iAlpha == 0) // then hide all
     {
@@ -129,7 +135,8 @@ SetAllElementsAlpha(integer iAlpha)
         llSetLinkPrimitiveParamsFast(LINK_SET, [PRIM_GLOW, ALL_SIDES, 0.0]);  // set all no glow
     }
     llSetLinkAlpha(LINK_SET, (float)iAlpha, ALL_SIDES);
-    if(iAlpha == 0) return ;
+    if(iAlpha == 0)
+        return ;
     RestoreAllGlows();
     //update alpha for all elements to fAlpha (either 1.0 or 0.0 here)
     integer n;
@@ -166,8 +173,10 @@ SetElementAlpha(string element_to_set, integer iAlpha)
     }
     //update element in list of settings
     integer i = llListFindList(g_lAlphaSettings, [element_to_set]);
-    if (i == -1) g_lAlphaSettings += [element_to_set, (string)iAlpha];
-    else g_lAlphaSettings = llListReplaceList(g_lAlphaSettings, [(string)iAlpha], i+1, i+1);
+    if (i == -1)
+        g_lAlphaSettings += [element_to_set, (string)iAlpha];
+    else
+        g_lAlphaSettings = llListReplaceList(g_lAlphaSettings, [(string)iAlpha], i+1, i+1);
 }
 
 SaveElementAlpha(string element_to_set, integer iAlpha)
@@ -180,8 +189,10 @@ ElementMenu(key kAv, integer iAuth)
     string sPrompt = "\nWhich element of the " + CTYPE + " would you like to hide or show?\n\n☒: element is shown\n☐: element is hidden\n\nChoose *Touch* if you want to select the part by directly clicking on the " + CTYPE + ".";
     g_lButtons = [];
 
-    if (g_iAllAlpha) g_lButtons += HIDE + " " + CTYPE ;
-    else g_lButtons += SHOW + " " + CTYPE ;
+    if (g_iAllAlpha)
+        g_lButtons += HIDE + " " + CTYPE ;
+    else
+        g_lButtons += SHOW + " " + CTYPE ;
 
     //loop through elements, show appropriate buttons and prompts if hidden or shown
     integer n;
@@ -191,14 +202,14 @@ ElementMenu(key kAv, integer iAuth)
         string sElement = llList2String(g_lElements, n);
         integer iIndex = llListFindList(g_lAlphaSettings, [sElement]);
         if (iIndex == -1)
-        {
             g_lButtons += HIDE + " " + sElement;
-        }
         else
         {
             integer iAlpha = llList2Integer(g_lAlphaSettings, iIndex + 1);
-            if (iAlpha) g_lButtons += HIDE + " " + sElement;
-            else  g_lButtons += SHOW + " " + sElement;
+            if (iAlpha)
+                g_lButtons += HIDE + " " + sElement;
+            else
+                g_lButtons += SHOW + " " + sElement;
         }
     }
 
@@ -210,10 +221,13 @@ string ElementType(integer link)
     string sDesc = llStringTrim(llList2String(llGetLinkPrimitiveParams(link,[PRIM_DESC]),0),STRING_TRIM);
     //each prim should have <elementname> in its description, plus "nohide", if you want the prim to
     //not appear in the hede menu
-    if (sDesc == "" || sDesc == "(No Description)") return g_sIgnore ;
+    if (sDesc == "" || sDesc == "(No Description)")
+        return g_sIgnore ;
     list lParams = llParseString2List(sDesc, ["~"], []);
-    if ( ~llListFindList(lParams,[g_sIgnore]) ) return g_sIgnore ;
-    else return llList2String(lParams, 0);
+    if ( ~llListFindList(lParams,[g_sIgnore]) )
+        return g_sIgnore ;
+    else
+        return llList2String(lParams, 0);
 }
 
 BuildElementList()
@@ -226,14 +240,13 @@ BuildElementList()
     {
         string sElement = ElementType(link);
         if (llListFindList(g_lElements,[sElement])==-1 && sElement != g_sIgnore)
-        {
             g_lElements += [sElement];
-        }
     }
     g_lElements = llListSort(g_lElements, 1, TRUE);
-    
-    if (llGetListLength(g_lElements) > 0 ) g_iHasElements = TRUE;
-    else g_iHasElements = FALSE;
+    if (llGetListLength(g_lElements) > 0 )
+        g_iHasElements = TRUE;
+    else
+        g_iHasElements = FALSE;
 }
 
 UpdateGlow(integer link, integer alpha)
@@ -243,7 +256,8 @@ UpdateGlow(integer link, integer alpha)
         SavePrimGlow(link);
         llSetLinkPrimitiveParamsFast(link, [PRIM_GLOW, ALL_SIDES, 0.0]);  // set no glow;
     }
-    else RestorePrimGlow(link);
+    else
+        RestorePrimGlow(link);
 }
 
 SavePrimGlow(integer link)
@@ -252,8 +266,10 @@ SavePrimGlow(integer link)
     if (glow > 0)
     {
         integer i = llListFindList(g_lGlows,[link]);
-        if (i !=-1 ) g_lGlows = llListReplaceList(g_lGlows,[glow],i+1,i+1) ;            
-        else g_lGlows += [link, glow];            
+        if (i !=-1 )
+            g_lGlows = llListReplaceList(g_lGlows,[glow],i+1,i+1) ;            
+        else
+            g_lGlows += [link, glow];            
     }
 }
 
@@ -313,13 +329,15 @@ integer UserCommand(integer iNum, string sStr, key kID)
 
     if (!g_iAppLock || iNum == COMMAND_OWNER)  // if unlocked or Owner can do it
     {
-        if (sStr == "menu " + g_sSubMenu || sStr == "hidemenu") ElementMenu(kID, iNum) ;
+        if (sStr == "menu " + g_sSubMenu || sStr == "hidemenu")
+            ElementMenu(kID, iNum) ;
         else if (sCommand == "hide")
         {
             if(sValue == "" || sValue == CTYPE)
             {
                 SetAllElementsAlpha(0);
-                if (!g_iHasElements) MakeOneButtonMenu();
+                if (!g_iHasElements)
+                    MakeOneButtonMenu();
             }
             else
             {
@@ -329,20 +347,18 @@ integer UserCommand(integer iNum, string sStr, key kID)
         }
         else if (sCommand == "stealth")
         {
-            if (g_iAllAlpha == 0) {
+            if (g_iAllAlpha == 0)
                 SetAllElementsAlpha(1);
-            }
-            else {
+            else
                 SetAllElementsAlpha(0);
-            }
-                
         }
         else if (sCommand == "show")
         {
             if(sValue == "" || sValue == CTYPE)
             {
                 SetAllElementsAlpha(1);
-                if (!g_iHasElements) MakeOneButtonMenu();
+                if (!g_iHasElements)
+                    MakeOneButtonMenu();
             }
             else
             {
@@ -353,13 +369,15 @@ integer UserCommand(integer iNum, string sStr, key kID)
         else if (sStr == "menu "+HIDE+" Stealth")
         {
             SetAllElementsAlpha(1);
-            if (!g_iHasElements) MakeOneButtonMenu();
+            if (!g_iHasElements)
+                MakeOneButtonMenu();
             llMessageLinked(LINK_SET, iNum, "menu " + g_sParentMenu, kID);
         }
         else if (sStr == "menu "+SHOW+" Stealth")
         {
             SetAllElementsAlpha(0) ;
-            if (!g_iHasElements) MakeOneButtonMenu();
+            if (!g_iHasElements)
+                MakeOneButtonMenu();
             llMessageLinked(LINK_SET, iNum, "menu " + g_sParentMenu, kID);
         }
     }
@@ -371,14 +389,13 @@ integer UserCommand(integer iNum, string sStr, key kID)
 
     if (iNum == COMMAND_OWNER && sCommand == "lockappearance")
     {
-        if (sValue == "0") g_iAppLock = FALSE;
-        else if (sValue == "1") g_iAppLock = TRUE;
+        if (sValue == "0")
+            g_iAppLock = FALSE;
+        else if (sValue == "1")
+            g_iAppLock = TRUE;
     }
     else if (iNum == COMMAND_WEARER && sStr == "runaway")
-    {
         SetAllElementsAlpha(1);
-    }
-
     return TRUE ;
 }
 
@@ -386,9 +403,12 @@ integer UserCommand(integer iNum, string sStr, key kID)
 string SplitTokenValue(string in, integer slot)
 {
     string out ;
-    if (slot==0) out = llGetSubString(in, 0,  llSubStringIndex(in, "_") );
-    else if (slot==1) out = llGetSubString(in,  llSubStringIndex(in, "_")+1, llSubStringIndex(in, "=")-1);
-    else if (slot==2) out = llGetSubString(in, llSubStringIndex(in, "=")+1, -1);
+    if (slot==0)
+        out = llGetSubString(in, 0,  llSubStringIndex(in, "_") );
+    else if (slot==1)
+        out = llGetSubString(in,  llSubStringIndex(in, "_")+1, llSubStringIndex(in, "=")-1);
+    else if (slot==2)
+        out = llGetSubString(in, llSubStringIndex(in, "=")+1, -1);
     return out ;
 }
 
@@ -404,39 +424,42 @@ default
     on_rez(integer iParam)
     {        
         g_iAllAlpha=0;
-        if (llGetAlpha(ALL_SIDES)>0) g_iAllAlpha=1;
-        if (!g_iHasElements) BuildElementList();
+        if (llGetAlpha(ALL_SIDES)>0)
+            g_iAllAlpha=1;
+        if (!g_iHasElements)
+            BuildElementList();
     }
     
     changed(integer change)
     {
-        if (change & CHANGED_LINK) BuildElementList();
-        if (change & CHANGED_OWNER) llResetScript();
+        if (change & CHANGED_LINK)
+            BuildElementList();
+        if (change & CHANGED_OWNER)
+            llResetScript();
     }
 
     link_message(integer iSender, integer iNum, string sStr, key kID)
     {
-        if (UserCommand(iNum, sStr, kID)) return;
-
+        if (UserCommand(iNum, sStr, kID))
+            return;
         else if (iNum == LM_SETTING_RESPONSE)
         {
             string sGroup = SplitTokenValue(sStr, 0);
             string sToken = SplitTokenValue(sStr, 1);
             string sValue = SplitTokenValue(sStr, 2);
             if (sGroup == g_sScript)
-            {
                 SetElementAlpha(sToken, (integer)sValue);
-            }
             else if (sGroup+sToken == g_sAppLockToken)
-            {
                 g_iAppLock = (integer)sValue;
-            }
-            else if (sGroup+sToken == "Global_CType") CTYPE = sValue;
+            else if (sGroup+sToken == "Global_CType")
+                CTYPE = sValue;
         }
         else if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
         {
-            if (g_iHasElements) llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
-            else MakeOneButtonMenu() ;
+            if (g_iHasElements)
+                llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, "");
+            else
+                MakeOneButtonMenu() ;
         }
         else if (iNum == DIALOG_RESPONSE)
         {
@@ -449,11 +472,8 @@ default
                 integer iPage = (integer)llList2String(lMenuParams, 2);
                 integer iAuth = (integer)llList2String(lMenuParams, 3);
 
-                if (sMessage == UPMENU)
-                {
-                    //main menu
+                if (sMessage == UPMENU) //main menu
                     llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                }
                 else if (sMessage == "*Touch*")
                 {
                     Notify(kAv, "Please touch the part of the " + CTYPE + " you want to hide or show. You can press ctr+alt+T to see invisible parts.", FALSE);
@@ -465,8 +485,10 @@ default
                     list lParams = llParseString2List(sMessage, [" "], []);
                     string sCmd = llList2String(lParams, 0);
                     string sElement = llList2String(lParams, 1);
-                    if (sCmd == HIDE ) sCmd = "hide";
-                    else if (sCmd == SHOW ) sCmd = "show";
+                    if (sCmd == HIDE )
+                        sCmd = "hide";
+                    else if (sCmd == SHOW )
+                        sCmd = "show";
                     UserCommand(iAuth, sCmd + " " + sElement, kAv);
                     ElementMenu(kAv, iAuth);
                 }
@@ -486,16 +508,16 @@ default
                 {
                     integer iIndex = llListFindList(g_lAlphaSettings, [sElement]);
                     integer iAlpha;
-                    if (iIndex == -1) iAlpha = 1; // assuming visible
-                    else iAlpha =  llList2Integer(g_lAlphaSettings, iIndex + 1);
+                    if (iIndex == -1)
+                        iAlpha = 1; // assuming visible
+                    else
+                        iAlpha =  llList2Integer(g_lAlphaSettings, iIndex + 1);
                     Notify(kAv, "You selected \"" + sElement+"\". Toggling its transparency.", FALSE);
                     SetElementAlpha(sElement, !iAlpha);
                     SaveElementAlpha(sElement, !iAlpha);
                 }
                 else
-                {
                     Notify(kAv, "You selected a prim which is not hideable. You can try again.", FALSE);
-                }
                 ElementMenu(kAv, iAuth);
             }
         }

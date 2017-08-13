@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                             OpenCollar - rlvrelayIW                            //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,33 +20,44 @@ integer COMMAND_WEARER = 503;
 integer COMMAND_RLV_RELAY = 507; // now will be used from rlvrelay to rlvmain, for ping only
 integer COMMAND_SAFEWORD = 510;
 integer COMMAND_RELAY_SAFEWORD = 511;
+
 integer LM_SETTING_SAVE = 2000;//scripts send messages on this channel to have settings saved to httpdb
                             //str must be in form of "token=value"
 integer LM_SETTING_REQUEST = 2001;//when startup, scripts send requests for settings on this channel
 integer LM_SETTING_RESPONSE = 2002;//the httpdb script will send responses on this channel
 integer LM_SETTING_DELETE = 2003;
+
 integer MENUNAME_REQUEST = 3000;
 integer MENUNAME_RESPONSE = 3001;
 integer MENUNAME_REMOVE = 3003;
+
 integer RLV_CMD = 6000;
 integer RLV_REFRESH = 6001;//RLV plugins should reinstate their restrictions upon receiving this message.
+
 integer RLV_OFF = 6100; // send to inform plugins that RLV is disabled now, no message or key needed
 integer RLV_ON = 6101; // send to inform plugins that RLV is enabled now, no message or key needed
+
 integer DIALOG = -9000;
 integer DIALOG_RESPONSE = -9001;
 integer DIALOG_TIMEOUT = -9002;
 
 string g_sParentMenu = "RLV";
 string g_sSubMenu = "Relay";
+
 string UPMENU = "BACK";
+
 string ALL = " ALL";
+
 key g_kWearer;
+
 key g_kMenuID;
 key g_kMinModeMenuID;
 key g_kAuthMenuID;
 key g_kListMenuID;
 key g_kListID;
+
 integer g_iGarbageRate = 60; //garbage collection rate
+
 list g_lSources=[];
 list g_lTempWhiteList=[];
 list g_lTempBlackList=[];
@@ -61,6 +71,7 @@ list g_lObjWhiteListNames=[];
 list g_lObjBlackListNames=[];
 list g_lAvWhiteListNames=[];
 list g_lAvBlackListNames=[];
+
 integer g_iRLV=FALSE;
 list g_lQueue=[];
 integer QSTRIDES=3;
@@ -68,14 +79,18 @@ integer g_iListener=0;
 integer g_iAuthPending = FALSE;
 integer g_iRecentSafeword;
 string g_sListType;
+
 //relay specific message map
 integer CMD_ADDSRC = 11;
 integer CMD_REMSRC = 12;
+
 string CTYPE = "collar";
 string WEARERNAME;
 list g_lCollarOwnersList;
 list g_lCollarSecOwnersList;
 list g_lCollarBlackList;
+
+
 //settings
 integer g_iMinBaseMode = 0;
 integer g_iMinSafeMode = 1;
@@ -180,7 +195,7 @@ UpdateSettings(string sSettings)
 {
     list lArgs = llParseString2List(sSettings,[","],[]);
     integer i;
-    for (i=0;i<(lArgs!=[]);++i)
+    for (i=0;i<llGetListLength(lArgs);++i)     // IW PATCH
     {
         list setting=llParseString2List(llList2String(lArgs,i),[":"],[]);
         string var=llList2String(setting,0);
@@ -215,7 +230,7 @@ integer Auth(key object, key user)
     key kOwner = llGetOwnerKey(object);
     //object auth
     integer iSourceIndex=llListFindList(g_lSources,[object]);
-    if (~iSourceIndex) 
+    if (~iSourceIndex)
     { }
     else if (~llListFindList(g_lTempBlackList+g_lObjBlackList,[object]))
          return -1;
@@ -293,16 +308,14 @@ string HandleCommand(string sIdent, key kID, string sCom, integer iAuthed)
     integer iGotWho = FALSE; // has the user been specified up to now?
     key kWho;
     integer i;
-    for (i=0;i<(lCommands!=[]);++i)
+    for ( i = 0 ; i < llGetListLength(lCommands) ; i++)     // IW PATCH for OC 3.991  What a HORRIBLE OC coding in the first place! Trying to save a few bytes? Pfff!!
     {
         sCom = llList2String(lCommands,i);
         list lSubArgs = llParseString2List(sCom,["="],[]);
         string sVal = llList2String(lSubArgs,1);
         string sAck = "ok";
         if (sCom == "!release" || sCom == "@clear")
-        {
              llMessageLinked(LINK_SET,RLV_CMD,"clear",kID);
-            }
         else if (sCom == "!version")
             sAck = "1100";
         else if (sCom == "!implversion")
@@ -329,7 +342,7 @@ string HandleCommand(string sIdent, key kID, string sCom, integer iAuthed)
                  sAck="ko";
         }
         else if (g_iPlayMode&&llGetSubString(sCom,0,0)=="@"&&sVal!="n"&&sVal!="add")
-            llMessageLinked(LINK_SET,RLV_CMD, llGetSubString(sCom,1,-1), kID);
+           llMessageLinked(LINK_SET,RLV_CMD, llGetSubString(sCom,1,-1), kID);
         else if (!iAuthed)
         {
             if (iGotWho) return "!x-who/"+(string)kWho+"|"+llDumpList2String(llList2List(lCommands,i,-1),"|");
@@ -341,14 +354,14 @@ string HandleCommand(string sIdent, key kID, string sCom, integer iAuthed)
             string sBehav=llGetSubString(llList2String(lSubArgs,0),1,-1);
             if (sVal=="force"||sVal=="n"||sVal=="add"||sVal=="y"||sVal=="rem"||sBehav=="clear")
                 llMessageLinked(LINK_SET,RLV_CMD,sBehav+"="+sVal,kID);
-            else 
+            else
                 sAck="ko";
         }
         else
         {
             llOwnerSay("Bad RLV relay command from "+llKey2Name(kID)+". \nCommand: "+sIdent+","+(string)g_kWearer+","+llDumpList2String(lCommands,"|")+"\nFaulty subcommand: "+sCom+"\nPlease report to the maker of this device."); //added this after issue 984
             sAck=""; //not ko'ing as some old bug in chorazin cages would make them go wrong. Otherwise "ko" looks closer in spirit to the relay spec. (issue 514)
-        }//probably an ill-formed command, not answering    
+        }//probably an ill-formed command, not answering
         if (sAck)
             sendrlvr(sIdent, kID, sCom, sAck);
     }
@@ -375,10 +388,8 @@ SafeWord()
         g_lTempUserBlackList=[];
         g_lTempUserWhiteList=[];
         integer i;
-        for (i=0;i<(g_lSources!=[]);++i)
-        {
+        for (i=0;i<llGetListLength(g_lSources);++i)     // IW PATCH
             sendrlvr("release", llList2Key(g_lSources, i), "!release", "ok");
-        }
         g_lSources=[];
         g_iRecentSafeword = TRUE;
         refreshRlvListener();
@@ -393,18 +404,30 @@ SafeWord()
 //----Menu functions section---//
 Menu(key kID, integer iAuth)
 {
-    string sPrompt = "\nwww.opencollar.at/relay\n\nCurrent mode is: " + Mode2String(FALSE);
-    list lButtons = llDeleteSubList(["Off", "Restricted", "Ask", "Auto"],g_iBaseMode,g_iBaseMode);
+    string sPrompt;
+    list lButtons;
+    if(g_iMinBaseMode == 0)//only show is minimode is turned off
+    {
+        sPrompt = "Pick from 4 base modes - \"Off\", \"Restricted\", \"Ask\", and \"Auto\"";
+        lButtons = llDeleteSubList(["Off", "Restricted", "Ask", "Auto"],g_iBaseMode,g_iBaseMode);
+    }
+    sPrompt += "\nCurrent mode is: " + Mode2String(FALSE);
     if (g_lSources != [])
          lButtons = llDeleteSubList(lButtons,0,0);
-    if (g_iPlayMode)
-         lButtons+=["☒ Playful"];
-    else
-         lButtons+=["☐ Playful"];
-    if (g_iLandMode)
-         lButtons+=["☒ Land"];
-    else
-         lButtons+=["☐ Land"];
+    if (!g_iMinPlayMode)
+    {
+        if (g_iPlayMode)
+             lButtons+=["- Playful"];
+        else
+             lButtons+=["+ Playful"];
+    }
+    if (!g_iMinLandMode)
+    {
+        if (g_iLandMode)
+             lButtons+=["- Land"];
+        else
+             lButtons+=["+ Land"];
+    }
     if (g_lSources!=[])
     {
         sPrompt+="\n\nCurrently grabbed by "+(string)(g_lSources!=[])+" object";
@@ -416,12 +439,12 @@ Menu(key kID, integer iAuth)
         if (g_iSafeMode)
              lButtons+=["Safeword"];
     }
-    else if (kID == g_kWearer)
+    else if (kID == g_kWearer && !g_iMinSafeMode)
     {
         if (g_iSafeMode)
-             lButtons+=["☒ Safeword"];
+             lButtons+=["- Safeword"];
         else
-             lButtons+=["☐ Safeword"];
+             lButtons+=["+ Safeword"];
     }
     if (g_lQueue!=[])
     {
@@ -429,6 +452,8 @@ Menu(key kID, integer iAuth)
         lButtons+=["Pending"];
     }
     lButtons+=["Access Lists", "MinMode"];
+    if(g_iMinBaseMode != 0 || g_iMinPlayMode || g_iMinLandMode || g_iMinSafeMode)
+        sPrompt+="\nSome restrictions have been set in MinMode";
     sPrompt+="\n\nMake a choice:";
 
     g_kMenuID = Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth);
@@ -437,20 +462,20 @@ Menu(key kID, integer iAuth)
 MinModeMenu(key kID, integer iAuth)
 {
     list lButtons = llDeleteSubList(["Off", "Restricted", "Ask", "Auto"],g_iMinBaseMode,g_iMinBaseMode);
-    string sPrompt = "\nwww.opencollar.at/relay\n\nCurrent minimal authorized relay mode is: " + Mode2String(TRUE);
+    string sPrompt = "Current minimal authorized relay mode is: " + Mode2String(TRUE);
     if (g_iMinPlayMode)
-         lButtons+=["☒ Playful"];
+         lButtons+=["- Playful"];
     else
-         lButtons+=["☐ Playful"];
+         lButtons+=["+ Playful"];
     if (g_iMinLandMode)
-         lButtons+=["☒ Land"];
+         lButtons+=["- Land"];
     else
-         lButtons+=["☐ Land"];
+         lButtons+=["+ Land"];
     if (g_iMinSafeMode)
-         lButtons+=["☒ Safeword"];
+         lButtons+=["- Safeword"];
     else
-         lButtons+=["☐ Safeword"];
-    sPrompt+="\n\nChoose a new minimal mode the wearer won't be allowed to go under.\n(owner only)";
+         lButtons+=["+ Safeword"];
+    sPrompt+="\nAny setting showing as a \"-\" can not be changed in main menu\nChoose a new minimal mode (forces ) the wearer won't be allowed to change.\n(owner only)";
     g_kMinModeMenuID = Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth);
 }
 
@@ -518,7 +543,7 @@ PListsMenu(key kID, string sMsg, integer iAuth)
 
     list lButtons=[ALL];
     integer i;
-    for (i=0;i<(lOList!=[]);++i)
+    for (i=0;i<llGetListLength(lOList);++i)     // IW PATCH
     {
         lButtons+=(string)(i+1);
         Notify(kID, (string)(i+1)+": "+llList2String(lOListNames,i)+", "+llList2String(lOList,i), FALSE );
@@ -546,7 +571,7 @@ RemListItem(string sMsg, integer iAuth)
             g_lAvBlackListNames=[];
             return;
         }
-        if  (i<(g_lAvBlackList!=[]))
+        if  (i<llGetListLength(g_lAvBlackList))     // IW PATCH
         {
             g_lAvBlackList=llDeleteSubList(g_lAvBlackList,i,i);
             g_lAvBlackListNames=llDeleteSubList(g_lAvBlackListNames,i,i);
@@ -560,7 +585,7 @@ RemListItem(string sMsg, integer iAuth)
             g_lObjBlackListNames=[];
             return;
         }
-        if  (i<(g_lObjBlackList!=[]))
+        if  (i<llGetListLength(g_lObjBlackList))     // IW PATCH
         {
             g_lObjBlackList=llDeleteSubList(g_lObjBlackList,i,i);
             g_lObjBlackListNames=llDeleteSubList(g_lObjBlackListNames,i,i);
@@ -578,7 +603,7 @@ RemListItem(string sMsg, integer iAuth)
             g_lObjWhiteListNames=[];
             return;
         }
-        if  (i<(g_lObjWhiteList!=[]))
+        if  (i<llGetListLength(g_lObjWhiteList))     // IW PATCH
         {
             g_lObjWhiteList=llDeleteSubList(g_lObjWhiteList,i,i);
             g_lObjWhiteListNames=llDeleteSubList(g_lObjWhiteListNames,i,i);
@@ -592,7 +617,7 @@ RemListItem(string sMsg, integer iAuth)
             g_lAvWhiteListNames=[];
             return;
         }
-        if  (i<(g_lAvWhiteList!=[]))
+        if  (i<llGetListLength(g_lAvWhiteList))     // IW PATCH
         {
             g_lAvWhiteList=llDeleteSubList(g_lAvWhiteList,i,i);
             g_lAvWhiteListNames=llDeleteSubList(g_lAvWhiteListNames,i,i);
@@ -612,7 +637,8 @@ CleanQueue()
     //clean newly iNumed events, while preserving the order of arrival for every device
     list lOnHold=[];
     integer i=0;
-    while (i<(g_lQueue!=[])/QSTRIDES)  //GetQLength()
+    integer Len = llGetListLength(g_lQueue)/QSTRIDES;   // IW PATCH
+    while (i < Len)     // IW PATCH
     {
         string sIdent = llList2String(g_lQueue,0); //GetQident(0)
         key kObj = llList2String(g_lQueue,1); //GetQObj(0);
@@ -634,7 +660,7 @@ CleanQueue()
             g_lQueue = llDeleteSubList(g_lQueue,i,i+QSTRIDES-1); //DeleteQItem(i);
             list lCommands = llParseString2List(sCommand,["|"],[]);
             integer j;
-            for (j=0;j<(lCommands!=[]);++j)
+            for (j=0;j<llGetListLength(lCommands);++j)     // IW PATCH
                 sendrlvr(sIdent,kObj,llList2String(lCommands,j),"ko");
         }
         else
@@ -839,7 +865,7 @@ default
         g_sScript = llStringTrim(llList2String(llParseString2List(llGetScriptName(), ["-"], []), 1), STRING_TRIM) + "_";
         g_kWearer = llGetOwner();
         WEARERNAME = llGetDisplayName(g_kWearer);
-        if (WEARERNAME == "???" || WEARERNAME == "") 
+        if (WEARERNAME == "???" || WEARERNAME == "")
             WEARERNAME = llKey2Name(g_kWearer);
         g_lSources=[];
         llSetTimerEvent(g_iGarbageRate); //start garbage collection timer
@@ -848,13 +874,9 @@ default
     link_message(integer iSender_iNum, integer iNum, string sStr, key kID )
     {
         if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
-        {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|" + g_sSubMenu, NULL_KEY);
-        }
         else if (iNum==CMD_ADDSRC)
-        {
             g_lSources+=[kID];
-        }
         else if (iNum==CMD_REMSRC)
         {
             integer i= llListFindList(g_lSources,[kID]);
@@ -863,18 +885,18 @@ default
         }
         else if (UserCommand(iNum, sStr, kID))
              return;
-        else if ((iNum == LM_SETTING_RESPONSE || iNum == LM_SETTING_DELETE) && llSubStringIndex(sStr, "Global_WearerName") == 0 ) 
+        else if ((iNum == LM_SETTING_RESPONSE || iNum == LM_SETTING_DELETE) && llSubStringIndex(sStr, "Global_WearerName") == 0 )
         {
             integer iInd = llSubStringIndex(sStr, "=");
             string sValue = llGetSubString(sStr, iInd + 1, -1);
             //We have a broadcasted change to WEARERNAME to work with
             if (iNum == LM_SETTING_RESPONSE)
                 WEARERNAME = sValue;
-            else 
+            else
             {
                 g_kWearer = llGetOwner();
                 WEARERNAME = llGetDisplayName(g_kWearer);
-                if (WEARERNAME == "???" || WEARERNAME == "") 
+                if (WEARERNAME == "???" || WEARERNAME == "")
                     WEARERNAME = llKey2Name(g_kWearer);
             }
         }
@@ -939,10 +961,10 @@ default
                 if (kID==g_kMenuID || kID == g_kMinModeMenuID)
                 {
                     llSetTimerEvent(g_iGarbageRate);
-                    integer iIndex=llListFindList(["Auto","Ask","Restricted","Off","Safeword", "☐ Safeword", "☒ Safeword","☐ Playful","☒ Playful","☐ Land","☒ Land"],[sMsg]);
-                    if (sMsg=="Pending") 
+                    integer iIndex=llListFindList(["Auto","Ask","Restricted","Off","Safeword", "+ Safeword", "- Safeword","+ Playful","- Playful","+ Land","- Land"],[sMsg]);
+                    if (sMsg=="Pending")
                         UserCommand(iAuth, "relay pending", kAv);
-                    else if (sMsg=="Access Lists") 
+                    else if (sMsg=="Access Lists")
                         UserCommand(iAuth, "relay access", kAv);
                     else if (~iIndex)
                     {
@@ -961,7 +983,7 @@ default
                         llMessageLinked(LINK_SET, iAuth,"showrestrictions",kAv);
                         Menu(kAv, iAuth);
                     }
-                    else if (sMsg=="MinMode") 
+                    else if (sMsg=="MinMode")
                         MinModeMenu(kAv, iAuth);
                     else if (sMsg=="Help")
                     {
@@ -998,7 +1020,7 @@ default
                     string sCom = llList2String(g_lQueue,2);  //GetQCom(0));
                     key kUser = NULL_KEY;
                     integer iSave=TRUE;
-                    if (llGetSubString(sCom,0,6)=="!x-who/") 
+                    if (llGetSubString(sCom,0,6)=="!x-who/")
                         kUser = SanitizeKey(llGetSubString(sCom,7,42));
                     if (sMsg=="Yes")
                     {
@@ -1144,7 +1166,7 @@ default
         //garbage collection
         vector vMyPos = llGetRootPosition();
         integer i;
-        for (i=0;i<(g_lSources!=[]);++i)
+        for (i=0;i<llGetListLength(g_lSources);++i)     // IW PATCH
         {
             key kID = llList2Key(g_lSources,i);
             vector vObjPos = llList2Vector(llGetObjectDetails(kID, [OBJECT_POS]),0);

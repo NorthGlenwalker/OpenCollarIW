@@ -1,14 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////////
 // ------------------------------------------------------------------------------ //
 //                             OpenCollar - rlvstuff                              //
-//                                 version 3.992                                  //
+//                                 version 3.995                                  //
 // ------------------------------------------------------------------------------ //
-// Licensed under the GPLv2 with additional requirements specific to Second Life® //
-// and other virtual metaverse environments.  ->  www.opencollar.at/license.html  //
+// Licensed under the GPLv2 with additional requirements specific to InWorldz     //
 // ------------------------------------------------------------------------------ //
-// ©   2008 - 2014  Individual Contributors and OpenCollar - submission set free™ //
+// ©   2008 - 2017  Individual Contributors and OpenCollar Official               //
 // ------------------------------------------------------------------------------ //
-//          github.com/OpenCollar/OpenCollarHypergrid/tree/inworldz               //
+//          http://github.com/NorthGlenwalker/OpenCollarIW                        //
 // ------------------------------------------------------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,17 +127,25 @@ Dialog(key kID, string sPrompt, list lChoices, list lUtilityButtons, integer iPa
     else g_lMenuIDs += [kID, kMenuID, sName];
 } 
 
-Notify(key kID, string sMsg, integer iAlsoNotifyWearer) {
-    if (kID == g_kWearer) llOwnerSay(sMsg);
-    else {
-        if (llGetAgentSize(kID)) llRegionSayTo(kID, 0, sMsg);
-        else llInstantMessage(kID, sMsg);
-        if (iAlsoNotifyWearer) llOwnerSay(sMsg);
+Notify(key kID, string sMsg, integer iAlsoNotifyWearer)
+{
+    if (kID == g_kWearer)
+        llOwnerSay(sMsg);
+    else
+    {
+        if (llGetAgentSize(kID))
+            llRegionSayTo(kID, 0, sMsg);
+        else
+            llInstantMessage(kID, sMsg);
+        if (iAlsoNotifyWearer)
+            llOwnerSay(sMsg);
     }
 }
 
-Menu(key kID, integer iAuth, string sMenuName) {
-    if (!g_iRLVOn) {
+Menu(key kID, integer iAuth, string sMenuName)
+{
+    if (!g_iRLVOn)
+    {
         Notify(kID, "RLV features are now disabled in this " + CTYPE + ". You can enable those in RLV submenu. Opening it now.", FALSE);
         llMessageLinked(LINK_SET, iAuth, "menu RLV", kID);
         return;
@@ -149,225 +156,289 @@ Menu(key kID, integer iAuth, string sMenuName) {
     string sPrompt;
     list lButtons;
     n=llListFindList(g_lMenuHelpMap,[sMenuName]);
-    if (~n){
-        sPrompt="\nwww.opencollar.at/"+llList2String(g_lMenuHelpMap,n+1)+"\n";
-    }
 
     integer iStop = llGetListLength(g_lRLVcmds);
-    for (n = 0; n < iStop; n+=g_lRLVcmds_stride) {
-        if (llList2String(g_lRLVcmds,n)==sMenuName){
+    for (n = 0; n < iStop; n+=g_lRLVcmds_stride)
+    {
+        if (llList2String(g_lRLVcmds,n)==sMenuName)
+        {
             //see if there's a setting for this in the settings list
             string sCmd = llList2String(g_lRLVcmds, n+1);
             string sPretty = llList2String(g_lRLVcmds, n+2);
             string desc = llList2String(g_lRLVcmds, n+3);
             integer iIndex = llListFindList(g_lSettings, [sCmd]);
 
-            if (iIndex == -1) {
+            if (iIndex == -1)
+            {
                 //if this cmd not set, then give button to enable
                 lButtons += [TURNOFF + " " + sPretty];
                 sPrompt += "\n" + sPretty + " = Enabled (" + desc + ")";
-            } else {
+            }
+            else
+            {
                 //else this cmd is set, then show in prompt, and make button do opposite
                 //get value of setting
                 string sValue = llList2String(g_lSettings, iIndex + 1);
-                if (sValue == "y") {
+                if (sValue == "y")
+                {
                     lButtons += [TURNOFF + " " + sPretty];
                     sPrompt += "\n" + sPretty + " = Enabled (" + desc + ")";
-                } else if (sValue == "n") {
+                }
+                else if (sValue == "n")
+                {
                     lButtons += [TURNON + " " + sPretty];
                     sPrompt += "\n" + sPretty + " = Disabled (" + desc + ")";
                 }
             }
         }
     }
-
     //add immediate commands
     iStop = llGetListLength(g_lIdmtCmds);
-    for (n = 0; n < iStop; n = n + g_lIdmtCmds_stride) {
-        if (llList2String(g_lIdmtCmds, n)==sMenuName){
+    for (n = 0; n < iStop; n = n + g_lIdmtCmds_stride)
+    {
+        if (llList2String(g_lIdmtCmds, n)==sMenuName)
+        {
             lButtons += [llList2String(g_lIdmtCmds, n + 2)];
             sPrompt += "\n" + llList2String(g_lIdmtCmds, n + 2) + " = " + llList2String(g_lIdmtCmds, n + 3);
         }
     }
-
     //give an Allow All button
     lButtons += [TURNON + " All"];
     lButtons += [TURNOFF + " All"];
     Dialog(kID, sPrompt, lButtons, [UPMENU], 0, iAuth, sMenuName);
 }
 
-string GetSetting(string sCategory, string sParam) {
+string GetSetting(string sCategory, string sParam)
+{
     integer iIndex = llListFindList(g_lSettings, [sCategory,sParam]);
     return llList2String(g_lSettings, iIndex + 2);
 }
 
-SetSetting(string sCategory, string sOption, string sValue){
+SetSetting(string sCategory, string sOption, string sValue)
+{
     integer iIndex=llListFindList(g_lSettings,[sCategory,sOption]);
-    if (~iIndex) g_lSettings=llListReplaceList(g_lSettings, [sCategory, sOption, sValue], iIndex, iIndex+2); //there is already a setting, change it
-    else g_lSettings+=[sCategory, sOption, sValue];  //no setting exists.. add one
+    if (~iIndex)
+        g_lSettings=llListReplaceList(g_lSettings, [sCategory, sOption, sValue], iIndex, iIndex+2); //there is already a setting, change it
+    else
+        g_lSettings+=[sCategory, sOption, sValue];  //no setting exists.. add one
 
-    if (! ~llListFindList(g_lChangedCategories,[sCategory])) g_lChangedCategories+=sCategory;  //if there are no previous changes for thi category, add the category to the list of changed ones
+    if (! ~llListFindList(g_lChangedCategories,[sCategory]))
+        g_lChangedCategories+=sCategory;  //if there are no previous changes for thi category, add the category to the list of changed ones
 }
 
-UpdateSettings() {    //build one big string from the settings list, and send to to the viewer to reset rlv settings
+UpdateSettings()
+{    //build one big string from the settings list, and send to to the viewer to reset rlv settings
     integer iSettingsLength = llGetListLength(g_lSettings);
-    if (iSettingsLength > 0) {
+    if (iSettingsLength > 0)
+    {
         list lTempSettings;
         string sTempRLVSetting;
         string sTempRLVValue;
         integer n;
         list lNewList;
-        for (n = 0; n < iSettingsLength; n = n + 3) {
+        for (n = 0; n < iSettingsLength; n = n + 3)
+        {
             sTempRLVSetting=llList2String(g_lSettings, n+1);
             sTempRLVValue=llList2String(g_lSettings, n + 2);
             lNewList += [ sTempRLVSetting+ "=" + sTempRLVValue];
-            if (sTempRLVValue!="y")lTempSettings+=[sTempRLVSetting,sTempRLVValue];
+            if (sTempRLVValue!="y")
+                lTempSettings+=[sTempRLVSetting,sTempRLVValue];
         }
         //output that string to viewer
         llMessageLinked(LINK_SET, RLV_CMD, llDumpList2String(lNewList, ","), NULL_KEY);
     }
 }
 
-SaveSettings() {    //save to DB
+SaveSettings()
+{    //save to DB
     list lCategorySettings;
-    while (llGetListLength(g_lChangedCategories)){
+    while (llGetListLength(g_lChangedCategories))
+    {
         lCategorySettings=[];
         integer numSettings=llGetListLength(g_lSettings);
-        while (numSettings){  //go through the list of all settings, and pull out any belonging to this category, store in temp list.
+        while (numSettings)
+        {  //go through the list of all settings, and pull out any belonging to this category, store in temp list.
             numSettings -= 3;
             string sCategory=llList2String(g_lSettings,numSettings);
-            if (sCategory==llList2String(g_lChangedCategories,-1)){
+            if (sCategory==llList2String(g_lChangedCategories,-1))
                 lCategorySettings+=[llList2String(g_lSettings,numSettings+1),llList2String(g_lSettings,numSettings+2)];
-            }
         }
-        if (llGetListLength(lCategorySettings)>0) llMessageLinked(LINK_SET, LM_SETTING_SAVE, llList2String(g_lChangedCategories,-1) + "List=" + llDumpList2String(lCategorySettings, ","), "");
-        else llMessageLinked(LINK_SET, LM_SETTING_DELETE, llList2String(g_lChangedCategories,-1) + "List", "");
+        if (llGetListLength(lCategorySettings)>0)
+            llMessageLinked(LINK_SET, LM_SETTING_SAVE, llList2String(g_lChangedCategories,-1) + "List=" + llDumpList2String(lCategorySettings, ","), "");
+        else
+            llMessageLinked(LINK_SET, LM_SETTING_DELETE, llList2String(g_lChangedCategories,-1) + "List", "");
         
         g_lChangedCategories=llDeleteSubList(g_lChangedCategories,-1,-1);
     }
 }
 
-ClearSettings(string _category) { //clear local settings list, delte from settings db
+ClearSettings(string _category)
+{ //clear local settings list, delte from settings db
     integer numSettings=llGetListLength(g_lSettings);
-    while (numSettings){
+    while (numSettings)
+    {
         numSettings-=3;
         string sCategory=llList2String(g_lSettings,numSettings);
-        if (sCategory==_category || _category==""){
+        if (sCategory==_category || _category=="")
+        {
             g_lSettings=llDeleteSubList(g_lSettings,numSettings,numSettings+2);
-            if (! ~llListFindList(g_lChangedCategories,[sCategory])) g_lChangedCategories+=sCategory;  //if there are no previous changes for thi category, add the category to the list of changed ones
+            if (! ~llListFindList(g_lChangedCategories,[sCategory]))
+                g_lChangedCategories+=sCategory;  //if there are no previous changes for thi category, add the category to the list of changed ones
         }
     }
     SaveSettings();
     //main RLV script will take care of sending @clear to viewer
 }
 
-UserCommand(integer iNum, string sStr, key kID, string fromMenu) {
-    if (iNum > COMMAND_WEARER) return;  //nothing for lower than wearer here
+UserCommand(integer iNum, string sStr, key kID, string fromMenu)
+{
+    if (iNum > COMMAND_WEARER)
+        return;  //nothing for lower than wearer here
     sStr=llStringTrim(sStr,STRING_TRIM);
     string sStrLower=llToLower(sStr);
     
-    if (sStrLower == "sitmenu" || sStrLower == "menu sit") Menu(kID, iNum, "rlvsit_");
-    else if (sStrLower == "rlvtp" || sStrLower == "menu travel") Menu(kID, iNum, "rlvtp_");
-    else if (sStrLower == "rlvtalk" || sStrLower == "menu talk") Menu(kID, iNum, "rlvtalk_");
-    else if (sStrLower == "rlvtouch" || sStrLower == "menu touch") Menu(kID, iNum, "rlvtouch_");
-    else if (sStrLower == "rlvmisc" || sStrLower == "menu misc") Menu(kID, iNum, "rlvmisc_");
-    else if (sStrLower == "rlvview" || sStrLower == "menu v̶i̶e̶w̶") Menu(kID, iNum, "rlvview_");
-    else if (sStrLower == "sitnow") {
-        if (!g_iRLVOn) {
+    if (sStrLower == "sitmenu" || sStrLower == "menu sit")
+        Menu(kID, iNum, "rlvsit_");
+    else if (sStrLower == "rlvtp" || sStrLower == "menu travel")
+        Menu(kID, iNum, "rlvtp_");
+    else if (sStrLower == "rlvtalk" || sStrLower == "menu talk")
+        Menu(kID, iNum, "rlvtalk_");
+    else if (sStrLower == "rlvtouch" || sStrLower == "menu touch")
+        Menu(kID, iNum, "rlvtouch_");
+    else if (sStrLower == "rlvmisc" || sStrLower == "menu misc")
+        Menu(kID, iNum, "rlvmisc_");
+    else if (sStrLower == "rlvview" || sStrLower == "menu v̶i̶e̶w̶")
+        Menu(kID, iNum, "rlvview_");
+    else if (sStrLower == "sitnow")
+    {
+        if (!g_iRLVOn)
+        {
             Notify(kID, "RLV features are now disabled in this " + CTYPE + ". You can enable those in RLV submenu. Opening it now.", FALSE);
             llMessageLinked(LINK_SET, iNum, "menu RLV", kID);
-        } else {
+        }
+        else
+        {
             //give menu of nearby objects that have scripts in them
             //this assumes that all the objects you may want to force your sub to sit on
             //have scripts in them
             string sName="FindSeatMenu";
             key kMenuID = llGenerateKey();
             llMessageLinked(LINK_THIS, SENSORDIALOG, (string)kID + "|Pick the object on which you want the sub to sit.  If it's not in the list, have the sub move closer and try again.\n|0|``"+(string)(SCRIPTED|PASSIVE)+"`"+(string)g_fScanRange+"`"+(string)PI + "|BACK|" + (string)iNum, kMenuID);
-            
             integer iIndex = llListFindList(g_lMenuIDs, [kID]);
-            if (~iIndex) g_lMenuIDs = llListReplaceList(g_lMenuIDs, [kID, kMenuID, sName], iIndex, iIndex + g_iMenuStride - 1); //we've alread given a menu to this user.  overwrite their entry
-            else g_lMenuIDs += [kID, kMenuID, sName]; //we've not already given this user a menu. append to list
+            if (~iIndex)
+                g_lMenuIDs = llListReplaceList(g_lMenuIDs, [kID, kMenuID, sName], iIndex, iIndex + g_iMenuStride - 1); //we've alread given a menu to this user.  overwrite their entry
+            else
+                g_lMenuIDs += [kID, kMenuID, sName]; //we've not already given this user a menu. append to list
         }
-    } else {
+    }
+    else
+    {
         //do simple pass through for chat commands
         //since more than one RLV command can come on the same line, loop through them
         list lItems = llParseString2List(sStr, [","], []);
         integer n;
         integer iStop = llGetListLength(lItems);
         list lChange;  //list containing the categories with changed settings
-        for (n = 0; n < iStop; n++) {
+        for (n = 0; n < iStop; n++)
+        {
             //split off the parameters (anything after a : or =)
             //and see if the thing being set concerns us
             string sThisItem = llList2String(lItems, n);
             string sBehavior = llList2String(llParseString2List(sThisItem, ["=", ":"], []), 0);
             integer iBehaviourIndex=llListFindList(g_lRLVcmds, [sBehavior]);
-            
-            if (sStr == "standnow") {
-                if (iNum == COMMAND_WEARER) llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
-                else {
+            if (sStr == "standnow")
+            {
+                if (iNum == COMMAND_WEARER)
+                    llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
+                else
+                {
                     sStr = "unsit=force";
-                    if (GetSetting("rlvsit_","unsit")=="n") sStr = "unsit=y," + sStr + ",unsit=n";
+                    if (GetSetting("rlvsit_","unsit")=="n")
+                        sStr = "unsit=y," + sStr + ",unsit=n";
                     llMessageLinked(LINK_SET, RLV_CMD, sStr, NULL_KEY);
                 }
             }
-            else if (~iBehaviourIndex) {
+            else if (~iBehaviourIndex)
+            {
                 string sCategory=llList2String(g_lRLVcmds,iBehaviourIndex-1);
-                if (llGetSubString(sCategory,-1,-1)=="_"){  //
+                if (llGetSubString(sCategory,-1,-1)=="_")
+                {  //
                     //filter commands from wearer, if wearer is not owner
-                    if (iNum == COMMAND_WEARER) llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
-                    else {
+                    if (iNum == COMMAND_WEARER)
+                        llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
+                    else
+                    {
                         string sOption = llList2String(llParseString2List(sThisItem, ["="], []), 0);
                         string sParam = llList2String(llParseString2List(sThisItem, ["="], []), 1);
                         integer iIndex = llListFindList(g_lSettings, [sCategory,sOption]);
                         SetSetting(sCategory, sOption, sParam);
                     }
                 }
-            } else if (~llListFindList(llList2ListStrided(llDeleteSubList(g_lIdmtCmds,0,0),0,-1,g_lIdmtCmds_stride), [sBehavior])) {
+            }
+            else if (~llListFindList(llList2ListStrided(llDeleteSubList(g_lIdmtCmds,0,0),0,-1,g_lIdmtCmds_stride), [sBehavior]))
+            {
                 //filter commands from wearer, if wearer is not owner
-                if (iNum == COMMAND_WEARER) llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
-                else llMessageLinked(LINK_SET, RLV_CMD, sStr, NULL_KEY);
+                if (iNum == COMMAND_WEARER)
+                    llOwnerSay("Sorry, but RLV commands may only be given by owner, secowner, or group (if set).");
+                else
+                    llMessageLinked(LINK_SET, RLV_CMD, sStr, NULL_KEY);
             }
             else if (sBehavior == "clear" && iNum == COMMAND_OWNER) ClearSettings("");
         }
 
-        if (llGetListLength(g_lChangedCategories)) {
+        if (llGetListLength(g_lChangedCategories))
+        {
             UpdateSettings();
             SaveSettings();
         }
-        if (fromMenu!="") Menu(kID, iNum, fromMenu);
+        if (fromMenu!="")
+            Menu(kID, iNum, fromMenu);
     }
 }
 
-default {
-    state_entry() {
+default
+{
+    state_entry()
+    {
         g_kWearer = llGetOwner();
     }
     
-    on_rez(integer iParam) {
+    on_rez(integer iParam)
+    {
         llSetTimerEvent(0.0);
     }
 
-    timer() {
-        if (!g_iRLVOn) return;  // Nothing to do if RLV isn't enabled
-
+    timer()
+    {
+        if (!g_iRLVOn)
+            return;  // Nothing to do if RLV isn't enabled
         key kSitKey = llList2Key(llGetObjectDetails(g_kWearer, [OBJECT_ROOT]), 0);
-        
-        if (!g_iSitMode) {  // If we are in memory mode...
-            if (GetSetting("rlvsit_","unsit")=="n" || kSitKey == g_kWearer) g_sSitTarget = "";  // either unsit is allowed or you are not sitting anywhere, nothing to remember then
-            else if ((string)kSitKey != g_sSitTarget) g_sSitTarget = (string)kSitKey; // you are sitting somewhere you are not allowed to stand up from, then remember where it was
-        } else {  // Restore mode
+        if (!g_iSitMode)
+        {  // If we are in memory mode...
+            if (GetSetting("rlvsit_","unsit")=="n" || kSitKey == g_kWearer)
+                g_sSitTarget = "";  // either unsit is allowed or you are not sitting anywhere, nothing to remember then
+            else if ((string)kSitKey != g_sSitTarget)
+                g_sSitTarget = (string)kSitKey; // you are sitting somewhere you are not allowed to stand up from, then remember where it was
+        }
+        else
+        {  // Restore mode
             integer iIndex;
             string  sSittpValue;
-
-            if (g_sSitTarget == "") {  // Do we really have something to do ?
+            if (g_sSitTarget == "")
+            {  // Do we really have something to do ?
                 g_iSitMode = 0;
                 llSetTimerEvent(g_fPollDelay);
-            } else if ((string)kSitKey == g_sSitTarget) {   // Did we successfully resit the sub ?
+            }
+            else if ((string)kSitKey == g_sSitTarget)
+            {   // Did we successfully resit the sub ?
                 llOwnerSay("Sit Memory: Restored Forcesit on " + llKey2Name((key)g_sSitTarget));
                 g_iSitMode = 0;
                 llSetTimerEvent(g_fPollDelay);
-            } if (g_iRestoreCount > 0) g_iRestoreCount--;  // Count down retries...
-            else {
+            }
+            if (g_iRestoreCount > 0)
+                g_iRestoreCount--;  // Count down retries...
+            else
+            {
                 llOwnerSay("Sit Memory: Lucky day! All attempts at restoring forcesit failed, giving up.");
                 g_iSitMode = 0;
                 llSetTimerEvent(g_fPollDelay);
@@ -379,8 +450,10 @@ default {
         }
     }
     
-    link_message(integer iSender, integer iNum, string sStr, key kID) {
-        if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu) {
+    link_message(integer iSender, integer iNum, string sStr, key kID)
+    {
+        if (iNum == MENUNAME_REQUEST && sStr == g_sParentMenu)
+        {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|Sit", "");
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|Travel", "");
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|Talk", "");
@@ -388,8 +461,10 @@ default {
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|Misc", "");
             llMessageLinked(LINK_SET, MENUNAME_RESPONSE, g_sParentMenu + "|V̶i̶e̶w̶", "");
         }
-        else if (iNum >= COMMAND_OWNER && iNum <= COMMAND_EVERYONE) UserCommand(iNum, sStr, kID, "");
-        else if (iNum == LM_SETTING_RESPONSE) {
+        else if (iNum >= COMMAND_OWNER && iNum <= COMMAND_EVERYONE)
+            UserCommand(iNum, sStr, kID, "");
+        else if (iNum == LM_SETTING_RESPONSE)
+        {
             //this is tricky since our db value contains equals signs
             //split string on both comma and equals sign
             //first see if this is the token we care about
@@ -397,16 +472,17 @@ default {
             string sToken = llList2String(lParams, 0);
             string sValue = llList2String(lParams, 1);
             integer iChange = FALSE;
-            
             string category=llList2String(llParseString2List(sToken,["_"],[]),0)+"_";
-            if (~llListFindList(g_lMenuHelpMap,[category])){
+            if (~llListFindList(g_lMenuHelpMap,[category]))
+            {
                 sToken=llList2String(llParseString2List(sToken,["_"],[]),1);
-                if (sToken == "List") {
-                    //throw away first element
+                if (sToken == "List")
+                {   //throw away first element
                     //everything else is real settings (should be even number)
                     ClearSettings(category);
                     list lNewSettings = llParseString2List(sValue, [","], []);
-                    while (llGetListLength(lNewSettings)){
+                    while (llGetListLength(lNewSettings))
+                    {
                         list lTempSettings=[category,llList2String(lNewSettings,-2),llList2String(lNewSettings,-1)];
                         g_lSettings+=lTempSettings;
                         lNewSettings=llDeleteSubList(lNewSettings,-2,-1);
@@ -414,26 +490,37 @@ default {
                     UpdateSettings();
                 }
             }
-            else if (sToken == "Global_CType") CTYPE = sValue;
-        } else if (iNum == RLV_REFRESH) {   //rlvmain just started up.  Tell it about our current restrictions
+            else if (sToken == "Global_CType")
+                CTYPE = sValue;
+        }
+        else if (iNum == RLV_REFRESH)
+        {   //rlvmain just started up.  Tell it about our current restrictions
             g_iRLVOn = TRUE;
             UpdateSettings();
             // If we had something stored in memory, engage restore mode
-            if (GetSetting("rlvsit_","unsit")!="n" && g_sSitTarget != "") {
+            if (GetSetting("rlvsit_","unsit")!="n" && g_sSitTarget != "")
+            {
                 llSetTimerEvent(g_fRestoreDelay);
                 g_iRestoreCount = 20;
                 g_iSitMode = 1;
-            } else {
+            }
+            else
+            {
                 llSetTimerEvent(g_fPollDelay);
                 g_iSitMode = 0;
             }
         }
-        else if (iNum == RLV_CLEAR) ClearSettings("");    //clear db and local settings list
-        else if (iNum == RLV_OFF) g_iRLVOn=FALSE;        // rlvoff -> we have to turn the menu off too
-        else if (iNum == RLV_ON) g_iRLVOn=TRUE;        // rlvon -> we have to turn the menu on again
-        else if (iNum == DIALOG_RESPONSE) {
+        else if (iNum == RLV_CLEAR)
+            ClearSettings("");    //clear db and local settings list
+        else if (iNum == RLV_OFF)
+            g_iRLVOn=FALSE;        // rlvoff -> we have to turn the menu off too
+        else if (iNum == RLV_ON)
+            g_iRLVOn=TRUE;        // rlvon -> we have to turn the menu on again
+        else if (iNum == DIALOG_RESPONSE)
+        {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
-            if (~iMenuIndex) {    //it's one of our menus
+            if (~iMenuIndex)
+            {    //it's one of our menus
                 list lMenuParams = llParseString2List(sStr, ["|"], []);
                 key kAv = (key)llList2String(lMenuParams, 0);          
                 string sMessage = llList2String(lMenuParams, 1);                                         
@@ -443,51 +530,69 @@ default {
                 //we have to subtract from the index because the dialog id comes in the middle of the stride
                 string sMenu=llList2String(g_lMenuIDs, iMenuIndex + 1);
                 g_lMenuIDs = llDeleteSubList(g_lMenuIDs, iMenuIndex - 1, iMenuIndex - 2 + g_iMenuStride);                
-                if (sMenu == "FindSeatMenu") {
-                    if (sMessage==UPMENU) Menu(kAv, iAuth, "rlvsit_");
-                    else if ((key) sMessage) {
+                if (sMenu == "FindSeatMenu")
+                {
+                    if (sMessage==UPMENU)
+                        Menu(kAv, iAuth, "rlvsit_");
+                    else if (llStringLength(sMessage) == 36) //ng not valid else if ((key)sMessage)
                         UserCommand(iAuth, "sit:" + sMessage + "=force", kAv, "rlvsit_");
-                    }                            
-                } else {
-                    if (sMessage == UPMENU) llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
-                    else if (sMessage == "SitNow") UserCommand(iAuth, "sitnow", kAv, "rlvsit_");
-                    else if (sMessage == "StandNow") UserCommand(iAuth, "standnow", kAv, "rlvsit_");
-                    else {
+                }
+                else
+                {
+                    if (sMessage == UPMENU)
+                        llMessageLinked(LINK_SET, iAuth, "menu " + g_sParentMenu, kAv);
+                    else if (sMessage == "SitNow")
+                        UserCommand(iAuth, "sitnow", kAv, "rlvsit_");
+                    else if (sMessage == "StandNow")
+                        UserCommand(iAuth, "standnow", kAv, "rlvsit_");
+                    else
+                    {
                         //we got a command to enable or disable something, like "Enable LM"
                         //get the actual command name by looking up the pretty name from the message
                         list lParams = llParseString2List(sMessage, [" "], []);
                         string sSwitch = llList2String(lParams, 0);
                         string sCmd = llDumpList2String(llDeleteSubList(lParams,0,0)," ");
                         integer iIndex = llListFindList(g_lRLVcmds, [sCmd]);
-                        if (sCmd == "All") {
+                        if (sCmd == "All")
+                        {
                             //handle the "Allow All" and "Forbid All" commands
                             string ONOFF;
                             //decide whether we need to switch to "y" or "n"
-                            if (sSwitch == TURNOFF) ONOFF = "n";  //enable all functions (ie, remove all restrictions
-                            else if (sSwitch == TURNON) ONOFF = "y";
+                            if (sSwitch == TURNOFF)
+                                ONOFF = "n";  //enable all functions (ie, remove all restrictions
+                            else if (sSwitch == TURNON)
+                                ONOFF = "y";
                             //loop through rlvcmds to create list
                             string sOut;
                             integer n;
                             integer iStop = llGetListLength(g_lRLVcmds);
-                            for (n = 0; n < iStop; n+=g_lRLVcmds_stride) {
-                                if (llList2String(g_lRLVcmds,n)==sMenu){
+                            for (n = 0; n < iStop; n+=g_lRLVcmds_stride)
+                            {
+                                if (llList2String(g_lRLVcmds,n)==sMenu)
+                                {
                                     if (sOut != "")  sOut += ",";  //prefix all but the first value with a comma, so we have a comma-separated list
                                     sOut += llList2String(g_lRLVcmds, n+1) + "=" + ONOFF;
                                 }
                             }
                             UserCommand(iAuth, sOut, kAv, sMenu);
-                        } else if (~iIndex && llList2String(g_lRLVcmds,iIndex-2)==sMenu) {
+                        }
+                        else if (~iIndex && llList2String(g_lRLVcmds,iIndex-2)==sMenu)
+                        {
                             string sOut = llList2String(g_lRLVcmds, iIndex-1);
                             sOut += "=";
-                            if (sSwitch == TURNON) sOut += "y";
-                            else if (sSwitch == TURNOFF) sOut += "n";
+                            if (sSwitch == TURNON)
+                                sOut += "y";
+                            else if (sSwitch == TURNOFF)
+                                sOut += "n";
                             //send rlv command out through auth system as though it were a chat command, just to make sure person who said it has proper authority
                             UserCommand(iAuth, sOut, kAv, sMenu);
                         }
                     }                                       
                 }
             }
-        } else if (iNum == DIALOG_TIMEOUT) {
+        }
+        else if (iNum == DIALOG_TIMEOUT)
+        {
             integer iMenuIndex = llListFindList(g_lMenuIDs, [kID]);
             //remove stride from g_lMenuIDs
             //we have to subtract from the index because the dialog id comes in the middle of the stride

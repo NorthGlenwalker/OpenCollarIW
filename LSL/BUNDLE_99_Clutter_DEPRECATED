@@ -30,7 +30,6 @@ ITEM|OpenCollar RLV Relay Help
 ITEM|OpenCollar Updater
 ITEM|OpenCollar Sub AO
 ITEM|~version
-ITEM|~PostureOverride
 SCRIPT|OpenCollar - update1
 SCRIPT|OpenCollar - update 1
 SCRIPT|OpenCollar - leash
@@ -43,3 +42,6 @@ SCRIPT|OpenCollar - main
 SCRIPT|OpenCollar - rlvex
 SCRIPT|OpenCollar - rlvmain
 SCRIPT|OpenCollar - leashParticle
+SCRIPT|OpenCollar - appearance
+SCRIPT|OpenCollar - badwords
+SCRIPT|OpenCollar - texture
